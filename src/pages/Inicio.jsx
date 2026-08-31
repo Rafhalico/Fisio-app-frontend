@@ -27,7 +27,7 @@ function Inicio() {
           </p>
         <div className="hero-botones">
             <Link to="/reservar" className="btn-primario">Reservar cita</Link>
-            <a href="#" className="btn-secundario">Contactar</a>
+            <a href="tel:626446019" className="btn-secundario">Contactar</a>
         </div>
 
         <div className="hero-confianza">
