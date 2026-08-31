@@ -61,20 +61,20 @@ async function handleReservar() {
     <span className="logo-nombre">María Montaño</span>
     <span className="logo-sub">FISIOTERAPIA</span>
   </div>
-  <div className="navbar-links">
+    <div className="navbar-links">
+    <Link to="/" className="btn-nav">Inicio</Link>
+    <Link to="/mis-citas" className="btn-nav">Mis citas</Link>
+    <Link to="/reservar" className="btn-nav">Reservar cita</Link>
     <button
-  className="btn-nav"
-  onClick={() => {
-    localStorage.removeItem('usuario');
-    navigate('/');
-  }}
->
-  Cerrar sesión
-</button>
-  <Link to="/" className="btn-nav">Inicio</Link>
-  <Link to="/mis-citas" className="btn-nav">Mis citas</Link>
-  <Link to="/reservar" className="btn-nav">Reservar cita</Link>
-</div>
+      className="btn-nav"
+      onClick={() => {
+        localStorage.removeItem('usuario');
+        navigate('/');
+      }}
+    >
+      Cerrar sesión
+    </button>
+  </div>
 </nav>
 
     <section className="reservar-hero">
