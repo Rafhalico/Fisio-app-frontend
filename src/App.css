@@ -145,6 +145,7 @@ p {
   display: flex;
   gap: 1rem;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .navbar-links a {
@@ -876,6 +877,16 @@ p {
   }
   .navbar {
     padding: 1rem 1.5rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+  .navbar-links {
+    justify-content: flex-start;
+  }
+  .btn-nav {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
   }
   .hero {
     padding: 2rem 1.5rem;
@@ -890,7 +901,6 @@ p {
     padding: 2rem 1.5rem;
   }
 }
-
 .resumen-reserva {
   background-color: #FDF0E6;
   border-radius: 12px;
