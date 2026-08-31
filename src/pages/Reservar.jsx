@@ -8,6 +8,7 @@ function Reservar() {
     const [disponibilidad, setDisponibilidad] = useState ([]);
     const [motivo, setMotivo] = useState('');
     const [mensajeReserva, setMensajeReserva] = useState('');
+    const [horaSeleccionada, setHoraSeleccionada] = useState('');
     const usuarioGuardado = localStorage.getItem('usuario');
     const usuario = JSON.parse(usuarioGuardado);
     const navigate= useNavigate();
@@ -38,8 +39,8 @@ async function cargarDisponibilidad(fechaElegida) {
   setDisponibilidad(data);
 }
 
-async function handleReservar(hora) {
-    const datetime = `${fecha} ${hora}`;
+async function handleReservar() {
+    const datetime = `${fecha} ${horaSeleccionada}`;
     const response = await fetch(`${import.meta.env.VITE_API_URL}/appointments`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -111,7 +112,7 @@ async function handleReservar(hora) {
               key={item.hora}
               className={item.huecosLibres > 0 ? "hora-disponible" : "hora-agotada"}
               disabled={item.huecosLibres === 0}
-              onClick={() => handleReservar(item.hora)}
+              onClick={() => setHoraSeleccionada(item.hora)}
             >
               {item.hora}
               <span className="huecos-info">{item.huecosLibres} libres</span>
@@ -126,6 +127,12 @@ async function handleReservar(hora) {
           onChange={(e) => setMotivo(e.target.value)}
         />
         <p className="mensaje-feedback">{mensajeReserva}</p>
+        {horaSeleccionada &&
+  <div className="resumen-reserva">
+    <p>Vas a reservar: <strong>{fecha} a las {horaSeleccionada}</strong></p>
+    <button className="btn-degradado" onClick={handleReservar}>Confirmar cita</button>
+  </div>
+}
       </div>
       <div className="reservar-decoracion-inferior"></div>
     </section>
