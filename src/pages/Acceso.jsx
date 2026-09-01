@@ -15,6 +15,9 @@ function Acceso() {
     const [telefonoReg, setTelefonoReg] = useState('');
     const [emailReg, setEmailReg] = useState('');
     const [mensajeRegistro, setMensajeRegistro] = useState('');
+    const [esperandoCodigo, setEsperandoCodigo] = useState(false);
+    const [codigoIngresado, setCodigoIngresado] = useState('');
+    const [nombreusuarioRegistrado, setNombreusuarioRegistrado] = useState('');
 
 async function handleLogin(){
     const response = await fetch(`${import.meta.env.VITE_API_URL}/login`, {
@@ -60,6 +63,25 @@ async function handleRegister(){
       return;
     }
 
+    setNombreusuarioRegistrado(nombreusuarioReg);
+    setEsperandoCodigo(true);
+  }
+
+  async function handleVerificar(){
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/verificar`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        nombreusuario: nombreusuarioRegistrado,
+        codigo: codigoIngresado
+      })
+    });
+  if (!response.ok) {
+    const errorTexto = await response.text();
+    setMensajeRegistro(errorTexto);
+  return;
+}
+
     const data = await response.json();
     localStorage.setItem('usuario', JSON.stringify(data));
     navigate('/reservar');
@@ -88,6 +110,7 @@ async function handleRegister(){
       </div>
 
       <div className="acceso-tarjetas">
+        {!esperandoCodigo &&
         <div className="tarjeta-acceso">
           <div className="tarjeta-icono">👤</div>
           <h2>Iniciar sesión</h2>
@@ -107,48 +130,64 @@ async function handleRegister(){
           <button className="btn-degradado" onClick={handleLogin}>Iniciar sesión</button>
           <p className="mensaje-feedback">{mensaje}</p>
         </div>
+}
 
-        <div className="tarjeta-acceso">
+                <div className="tarjeta-acceso">
           <div className="tarjeta-icono">✚</div>
-          <h2>Crear cuenta</h2>
-          <label>Nombre</label>
-          <input
-            placeholder="Tu nombre"
-            value={nombreReg}
-            onChange={(e) => setNombreReg(e.target.value)}
-          />
-          <label>Apellidos</label>
-          <input
-            placeholder="Tus apellidos"
-            value={apellidosReg}
-            onChange={(e) => setApellidosReg(e.target.value)}
-          />
-          <label>Nombre de usuario</label>
-          <input
-            placeholder="Elige un usuario"
-            value={nombreusuarioReg}
-            onChange={(e) => setNombreusuarioReg(e.target.value)}
-          />
-          <label>Contraseña</label>
-          <input
-            placeholder="Contraseña"
-            value={contraseñaReg}
-            type="password"
-            onChange={(e) => setContraseñaReg(e.target.value)}
-          />
-          <label>Teléfono</label>
-          <input
-            placeholder="Tu teléfono"
-            value={telefonoReg}
-            onChange={(e) => setTelefonoReg(e.target.value)}
-          />
-          <label>Email</label>
-          <input
-            placeholder="tu@email.com"
-            value={emailReg}
-            onChange={(e) => setEmailReg(e.target.value)}
-          />
-          <button className="btn-degradado" onClick={handleRegister}>Crear cuenta</button>
+          {!esperandoCodigo ? (
+            <>
+              <h2>Crear cuenta</h2>
+              <label>Nombre</label>
+              <input
+                placeholder="Tu nombre"
+                value={nombreReg}
+                onChange={(e) => setNombreReg(e.target.value)}
+              />
+              <label>Apellidos</label>
+              <input
+                placeholder="Tus apellidos"
+                value={apellidosReg}
+                onChange={(e) => setApellidosReg(e.target.value)}
+              />
+              <label>Nombre de usuario</label>
+              <input
+                placeholder="Elige un usuario"
+                value={nombreusuarioReg}
+                onChange={(e) => setNombreusuarioReg(e.target.value)}
+              />
+              <label>Contraseña</label>
+              <input
+                placeholder="Contraseña"
+                value={contraseñaReg}
+                type="password"
+                onChange={(e) => setContraseñaReg(e.target.value)}
+              />
+              <label>Teléfono</label>
+              <input
+                placeholder="Tu teléfono"
+                value={telefonoReg}
+                onChange={(e) => setTelefonoReg(e.target.value)}
+              />
+              <label>Email</label>
+              <input
+                placeholder="tu@email.com"
+                value={emailReg}
+                onChange={(e) => setEmailReg(e.target.value)}
+              />
+              <button className="btn-degradado" onClick={handleRegister}>Crear cuenta</button>
+            </>
+          ) : (
+            <>
+              <h2>Verifica tu email</h2>
+              <p>Te hemos enviado un código a tu correo. Introdúcelo aquí:</p>
+              <input
+                placeholder="Código de 6 dígitos"
+                value={codigoIngresado}
+                onChange={(e) => setCodigoIngresado(e.target.value)}
+              />
+              <button className="btn-degradado" onClick={handleVerificar}>Verificar</button>
+            </>
+          )}
           <p className="mensaje-feedback">{mensajeRegistro}</p>
         </div>
       </div>
