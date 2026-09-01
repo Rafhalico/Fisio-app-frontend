@@ -1,6 +1,7 @@
 import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {Link} from 'react-router-dom';
+import Footer from '../components/Footer';
 
 function Acceso() {
     const [nombreusuario, setNombreusuario] = useState('');
@@ -164,6 +165,7 @@ async function handleRegister(){
         </div>
       </div>
     </section>
+    <Footer />
   </>
 
     )    

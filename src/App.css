@@ -875,6 +875,9 @@ p {
   .servicios {
     grid-template-columns: 1fr;
   }
+  .reservar-decoracion-inferior {
+    display: none;
+  }
   .navbar {
     padding: 1rem 1.5rem;
     flex-direction: column;
@@ -912,4 +915,84 @@ p {
 .resumen-reserva p {
   color: #A62639;
   margin-bottom: 0.8rem;
+}
+/* FOOTER */
+.footer {
+  background: linear-gradient(135deg, #A62639, #E76F3C);
+  color: white;
+  padding: 3rem 4rem 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2.5rem;
+  justify-content: space-between;
+}
+
+.footer-columna {
+  flex: 1;
+  min-width: 200px;
+}
+
+.footer-columna h4 {
+  font-family: 'Marcellus', serif;
+  font-size: 1rem;
+  margin-bottom: 0.8rem;
+  color: white;
+}
+
+.footer-columna p {
+  text-align: left;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.9rem;
+  margin-bottom: 0.4rem;
+  font-weight: 400;
+}
+
+.footer-columna a {
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+}
+
+.footer-columna a:hover {
+  color: white;
+  text-decoration: underline;
+}
+
+.logo-nombre-footer {
+  display: block;
+  font-family: 'Marcellus', serif;
+  font-size: 1.2rem;
+  color: white;
+}
+
+.logo-sub-footer {
+  display: block;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.75);
+  margin-bottom: 0.6rem;
+}
+
+.footer-instagram {
+  display: inline-block;
+  font-size: 0.9rem;
+}
+
+.footer-copyright {
+  width: 100%;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  margin-top: 1.5rem;
+  padding-top: 1.2rem;
+}
+
+.footer-copyright p {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+}
+
+@media (max-width: 550px) {
+  .footer {
+    padding: 2rem 1.5rem 1rem;
+  }
 }

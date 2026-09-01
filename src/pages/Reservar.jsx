@@ -3,6 +3,8 @@ import {Link} from 'react-router-dom';
 import Calendario from '../components/Calendario';
 import {useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
+import Footer from '../components/Footer';
+
 function Reservar() {
     const [fecha, setFecha] = useState ('');
     const [disponibilidad, setDisponibilidad] = useState ([]);
@@ -136,6 +138,7 @@ async function handleReservar() {
       </div>
       <div className="reservar-decoracion-inferior"></div>
     </section>
+    <Footer />
   </>
 )
 }

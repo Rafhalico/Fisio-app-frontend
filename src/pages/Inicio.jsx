@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import Footer from '../components/Footer';
 
 function Inicio() {
   return (
@@ -66,6 +67,7 @@ function Inicio() {
           <p>Reserva tu cita de forma rápida y sencilla cuando quieras.</p>
         </div>
       </section>
+      <Footer />
     </>
   );
 }
