@@ -26,7 +26,7 @@ function Footer() {
       <div className="footer-columna">
         <h4>Síguenos</h4>
         <a href="https://instagram.com/fisioterapia_mmg" target="_blank" className="footer-instagram">
-          @mariamgfisioterapia
+          @fisioterapia_mmg
         </a>
       </div>
 
