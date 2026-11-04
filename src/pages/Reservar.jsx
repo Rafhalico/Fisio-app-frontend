@@ -1,130 +1,187 @@
-import {useState} from 'react'
-import {Link} from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { CalendarCheck, Clock } from 'lucide-react';
+import Pagina, { CabeceraPagina } from '../components/Pagina';
 import Calendario from '../components/Calendario';
-import {useNavigate} from 'react-router-dom';
-import Footer from '../components/Footer';
-import { apiFetch } from '../api';
-import { cerrarSesion } from '../sesion';
+import Aviso from '../components/Aviso';
+import { apiFetch, ERROR_CONEXION } from '../api';
+import { DIAS_ABIERTO } from '../datos/clinica';
+import { aDate, hoyTexto, formatearDia, capitalizar } from '../utils/fechas';
+
+// El calendario solo deja elegir los días que abre la clínica.
+const esDiaDeApertura = (fecha) => DIAS_ABIERTO.includes(aDate(fecha).getDay());
 
 function Reservar() {
-    const [fecha, setFecha] = useState ('');
-    const [disponibilidad, setDisponibilidad] = useState ([]);
-    const [motivo, setMotivo] = useState('');
-    const [mensajeReserva, setMensajeReserva] = useState('');
-    const [horaSeleccionada, setHoraSeleccionada] = useState('');
-    const navigate= useNavigate();
+  const [fecha, setFecha] = useState('');
+  const [horas, setHoras] = useState([]);
+  const [cargando, setCargando] = useState(false);
+  const [errorHoras, setErrorHoras] = useState('');
+  const [horaSeleccionada, setHoraSeleccionada] = useState('');
+  const [motivo, setMotivo] = useState('');
+  const [enviando, setEnviando] = useState(false);
+  const [aviso, setAviso] = useState('');
+  const [reservada, setReservada] = useState(null); // { fecha, hora } tras reservar
+  const [recarga, setRecarga] = useState(0);
 
-async function cargarDisponibilidad(fechaElegida) {
-  const response = await apiFetch(`/appointments/available?fecha=${fechaElegida}`);
-
-  if (!response.ok) {
-    const errorTexto = await response.text();
-    console.log(errorTexto);
-    return;
+  // Al elegir día se reinicia la hora. Antes se quedaba la del día anterior
+  // y se podía reservar una hora que no estaba libre en el día nuevo.
+  function elegirFecha(nuevaFecha) {
+    setFecha(nuevaFecha);
+    setHoraSeleccionada('');
+    setAviso('');
+    setCargando(true);
+    setErrorHoras('');
   }
 
-  const data = await response.json();
-  setDisponibilidad(data);
-}
+  // Cada vez que cambia el día (o tras reservar) se piden los huecos libres.
+  useEffect(() => {
+    if (!fecha) return;
+    let activo = true;
+    apiFetch(`/appointments/available?fecha=${fecha}`)
+      .then(async (response) => {
+        if (!activo) return;
+        if (!response.ok) {
+          setHoras([]);
+          setErrorHoras(await response.text());
+          return;
+        }
+        let lista = await response.json();
+        // Si es hoy, quitamos las horas que ya han pasado.
+        if (fecha === hoyTexto()) {
+          const ahora = new Date();
+          lista = lista.filter((h) => aDate(`${fecha} ${h.hora}`) > ahora);
+        }
+        setHoras(lista);
+      })
+      .catch(() => activo && setErrorHoras(ERROR_CONEXION))
+      .finally(() => activo && setCargando(false));
+    return () => { activo = false; };
+  }, [fecha, recarga]);
 
-async function handleReservar() {
-    const datetime = `${fecha} ${horaSeleccionada}`;
-    // Ya no mandamos idPaciente: el servidor lo saca del token.
-    const response = await apiFetch('/appointments', {
+  async function handleReservar(e) {
+    e.preventDefault();
+    setEnviando(true);
+    setAviso('');
+    try {
+      const response = await apiFetch('/appointments', {
         method: 'POST',
-        body: JSON.stringify({
-            datetime: datetime,
-            motivo: motivo
-        })
-    });
-    const data = await response.text();
-    setMensajeReserva(data);
-    cargarDisponibilidad(fecha);
-}
- return (
-  <>
-   <nav className="navbar">
-  <div className="logo">
-    <span className="logo-nombre">María Montaño</span>
-    <span className="logo-sub">FISIOTERAPIA</span>
-  </div>
-    <div className="navbar-links">
-    <Link to="/" className="btn-nav">Inicio</Link>
-    <Link to="/mis-citas" className="btn-nav">Mis citas</Link>
-    <Link to="/reservar" className="btn-nav">Reservar cita</Link>
-    <button
-      className="btn-nav"
-      onClick={() => {
-        cerrarSesion();
-        navigate('/');
-      }}
-    >
-      Cerrar sesión
-    </button>
-  </div>
-</nav>
+        body: JSON.stringify({ datetime: `${fecha} ${horaSeleccionada}`, motivo: motivo.trim() })
+      });
+      if (!response.ok) {
+        // Por ejemplo, si otra persona ha cogido el hueco mientras tanto.
+        setAviso(await response.text());
+        setHoraSeleccionada('');
+        setRecarga((n) => n + 1);
+        return;
+      }
+      setReservada({ fecha, hora: horaSeleccionada });
+    } catch {
+      setAviso(ERROR_CONEXION);
+    } finally {
+      setEnviando(false);
+    }
+  }
 
-    <section className="reservar-hero">
-      <div className="reservar-hero-texto">
-        <h1 className="reservar-titulo">Reservar cita</h1>
-        <p className="reservar-subtitulo">
-          Selecciona la fecha y la hora que mejor se adapte a ti.
-        </p>
-      </div>
-      <div className="reservar-hero-imagen">
-        <img
-          src="https://images.unsplash.com/photo-1600334129128-685c5582fd35?w=800&q=80"
-          alt="Sala de fisioterapia"
-        />
-      </div>
-    </section>
+  function reservarOtra() {
+    setReservada(null);
+    setFecha('');
+    setHoras([]);
+    setHoraSeleccionada('');
+    setMotivo('');
+  }
 
-    <section className="reservar-panel">
-      <div className="reservar-columna">
-        <h3>1. Selecciona la fecha</h3>
-        <Calendario
-          fechaSeleccionada={fecha}
-          onSeleccionarFecha={(nuevaFecha) => {
-            setFecha(nuevaFecha);
-            cargarDisponibilidad(nuevaFecha);
-          }}
-        />
-      </div>
+  if (reservada) {
+    return (
+      <Pagina titulo="Cita reservada">
+        <CabeceraPagina titulo="Reservar cita" />
+        <section className="contenedor panel-flotante">
+          <div className="tarjeta confirmacion">
+            <span className="icono-circulo grande"><CalendarCheck size={32} aria-hidden="true" /></span>
+            <h2>¡Cita reservada!</h2>
+            <p className="confirmacion-fecha">
+              {capitalizar(formatearDia(reservada.fecha))} a las {reservada.hora}
+            </p>
+            <p className="texto-suave">
+              Si no puedes venir, cancélala desde «Mis citas» con al menos 24 horas de antelación.
+            </p>
+            <div className="botones-fila">
+              <Link to="/mis-citas" className="btn btn-primario">Ver mis citas</Link>
+              <button type="button" className="btn btn-secundario" onClick={reservarOtra}>Reservar otra</button>
+            </div>
+          </div>
+        </section>
+      </Pagina>
+    );
+  }
 
-      <div className="reservar-columna">
-        <h3>2. Selecciona la hora</h3>
-        <div className="horas-grid">
-          {disponibilidad.map((item) =>
-            <button
-              key={item.hora}
-              className={item.huecosLibres > 0 ? "hora-disponible" : "hora-agotada"}
-              disabled={item.huecosLibres === 0}
-              onClick={() => setHoraSeleccionada(item.hora)}
-            >
-              {item.hora}
-              <span className="huecos-info">{item.huecosLibres} libres</span>
-            </button>
-          )}
+  return (
+    <Pagina titulo="Reservar cita">
+      <CabeceraPagina titulo="Reservar cita" subtitulo="Elige el día y la hora que mejor te vengan." />
+
+      <section className="contenedor panel-flotante">
+        <div className="tarjeta panel-dos-columnas">
+          <div>
+            <h2 className="paso-titulo"><span>1</span> Elige el día</h2>
+            <Calendario fechaSeleccionada={fecha} onSeleccionarFecha={elegirFecha} esDiaDisponible={esDiaDeApertura} />
+            <p className="nota-calendario">Abrimos de lunes a viernes.</p>
+          </div>
+
+          <div>
+            <h2 className="paso-titulo"><span>2</span> Elige la hora</h2>
+            {!fecha && <p className="estado-vacio">Selecciona un día en el calendario para ver las horas libres.</p>}
+            {fecha && cargando && <p className="estado-vacio">Buscando huecos libres…</p>}
+            {fecha && !cargando && errorHoras && <Aviso tipo="error">{errorHoras}</Aviso>}
+            {fecha && !cargando && !errorHoras && horas.length === 0 && (
+              <p className="estado-vacio">No quedan horas disponibles este día. Prueba con otro.</p>
+            )}
+            {fecha && !cargando && horas.length > 0 && (
+              <>
+                <p className="texto-suave dia-elegido">{capitalizar(formatearDia(fecha))}</p>
+                <div className="horas-grid">
+                  {horas.map(({ hora, huecosLibres }) => (
+                    <button
+                      type="button"
+                      key={hora}
+                      className={hora === horaSeleccionada ? 'hora seleccionada' : 'hora'}
+                      disabled={huecosLibres === 0}
+                      aria-pressed={hora === horaSeleccionada}
+                      onClick={() => setHoraSeleccionada(hora)}
+                    >
+                      <Clock size={14} aria-hidden="true" /> {hora}
+                      {huecosLibres === 0 && <span className="hora-estado">Completo</span>}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {horaSeleccionada && (
+              <form onSubmit={handleReservar} className="formulario reservar-form">
+                <h2 className="paso-titulo"><span>3</span> Confirma tu cita</h2>
+                <div className="campo">
+                  <label htmlFor="motivo">Motivo de la consulta</label>
+                  <textarea
+                    id="motivo" rows={2} maxLength={200} required
+                    placeholder="Ej: dolor de espalda desde hace una semana"
+                    value={motivo} onChange={(e) => setMotivo(e.target.value)}
+                  />
+                </div>
+                <div className="resumen-reserva">
+                  <CalendarCheck size={20} aria-hidden="true" />
+                  <span>{capitalizar(formatearDia(fecha))} a las <strong>{horaSeleccionada}</strong></span>
+                </div>
+                <Aviso tipo="error">{aviso}</Aviso>
+                <button type="submit" className="btn btn-primario btn-bloque" disabled={enviando || !motivo.trim()}>
+                  {enviando ? 'Reservando…' : 'Confirmar cita'}
+                </button>
+              </form>
+            )}
+            {!horaSeleccionada && <Aviso tipo="error">{aviso}</Aviso>}
+          </div>
         </div>
+      </section>
+    </Pagina>
+  );
+}
 
-        <label>Motivo de la consulta</label>
-        <input
-          placeholder="Ej: Dolor de espalda"
-          value={motivo}
-          onChange={(e) => setMotivo(e.target.value)}
-        />
-        <p className="mensaje-feedback">{mensajeReserva}</p>
-        {horaSeleccionada &&
-  <div className="resumen-reserva">
-    <p>Vas a reservar: <strong>{fecha} a las {horaSeleccionada}</strong></p>
-    <button className="btn-degradado" onClick={handleReservar}>Confirmar cita</button>
-  </div>
-}
-      </div>
-      <div className="reservar-decoracion-inferior"></div>
-    </section>
-    <Footer />
-  </>
-)
-}
-export default Reservar 
+export default Reservar;

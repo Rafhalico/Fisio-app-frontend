@@ -1,132 +1,121 @@
-import { useState } from 'react';
-import {Link} from 'react-router-dom';
-import {useEffect} from 'react';
-import {useNavigate} from 'react-router-dom';
-import Footer from '../components/Footer';
-import { apiFetch } from '../api';
-import { cerrarSesion } from '../sesion';
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { CalendarPlus } from 'lucide-react';
+import Pagina, { CabeceraPagina } from '../components/Pagina';
+import CitaCard from '../components/CitaCard';
+import Aviso from '../components/Aviso';
+import { apiFetch, ERROR_CONEXION } from '../api';
+import { aDate } from '../utils/fechas';
+
+const PESTAÑAS = [
+  { id: 'proximas', nombre: 'Próximas' },
+  { id: 'historial', nombre: 'Historial' },
+  { id: 'canceladas', nombre: 'Canceladas' },
+];
+
+// Reparte las citas en las tres pestañas y las ordena:
+// las próximas de la más cercana a la más lejana; el resto, de la más reciente a la más antigua.
+function clasificar(citas) {
+  const ahora = new Date();
+  const porFecha = (a, b) => aDate(a.datetime) - aDate(b.datetime);
+  return {
+    proximas: citas.filter((c) => c.estado === 'reservada' && aDate(c.datetime) >= ahora).sort(porFecha),
+    historial: citas.filter((c) => c.estado !== 'cancelada' && aDate(c.datetime) < ahora).sort((a, b) => porFecha(b, a)),
+    canceladas: citas.filter((c) => c.estado === 'cancelada').sort((a, b) => porFecha(b, a)),
+  };
+}
 
 function MisCitas() {
-    const [citas, setCitas] = useState([]);
-    const [pestaña, setPestaña] = useState('proximas');
-    const [mensaje, setMensaje] = useState('');
-    const navigate= useNavigate();
+  const [citas, setCitas] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [pestaña, setPestaña] = useState('proximas');
+  const [aviso, setAviso] = useState(null);
+  const [recarga, setRecarga] = useState(0);
 
-    function citasFiltradas() {
-  const ahora = new Date();
+  useEffect(() => {
+    let activo = true;
+    apiFetch('/appointments/mias')
+      .then((response) => (response.ok ? response.json() : []))
+      .then((data) => { if (activo) setCitas(data); })
+      .catch(() => { if (activo) setAviso({ tipo: 'error', texto: ERROR_CONEXION }); })
+      .finally(() => { if (activo) setCargando(false); });
+    return () => { activo = false; };
+  }, [recarga]);
 
-  if (pestaña === 'proximas') {
-    return citas.filter(c => c.estado === 'reservada' && new Date(c.datetime) >= ahora);
-  }
-  if (pestaña === 'canceladas') {
-    return citas.filter(c => c.estado === 'cancelada');
-  }
-  return citas.filter(c => c.estado === 'reservada' && new Date(c.datetime) < ahora);
-}
-
-    // Cada vez que cambia "recarga" se vuelven a pedir las citas (p. ej. tras cancelar una).
-    const [recarga, setRecarga] = useState(0);
-
-    useEffect(() => {
-        // "activo" evita actualizar el estado si la página se cierra antes de que llegue la respuesta.
-        let activo = true;
-        apiFetch('/appointments/mias')
-            .then((response) => (response.ok ? response.json() : []))
-            .then((data) => { if (activo) setCitas(data); });
-        return () => { activo = false; };
-    }, [recarga]);
-
-    async function handleCancelar(idCita){
-        // Ya no se manda quienCancela: el servidor lo deduce del rol del token.
-        const response = await apiFetch(`/appointments/${idCita}`, { method: 'PUT' });
-        // Antes el mensaje solo iba a la consola; ahora se muestra (p. ej. la regla de 24 h).
-        setMensaje(await response.text());
-        setRecarga((n) => n + 1);
+  async function handleCancelar(idCita) {
+    try {
+      const response = await apiFetch(`/appointments/${idCita}`, { method: 'PUT' });
+      setAviso({
+        tipo: response.ok ? 'ok' : 'error',
+        texto: response.ok ? 'Cita cancelada correctamente.' : await response.text()
+      });
+      setRecarga((n) => n + 1);
+    } catch {
+      setAviso({ tipo: 'error', texto: ERROR_CONEXION });
     }
+  }
 
-    return (
-  <>
-    <nav className="navbar">
-  <div className="logo">
-    <span className="logo-nombre">María Montaño</span>
-    <span className="logo-sub">FISIOTERAPIA</span>
-  </div>
-    <div className="navbar-links">
-    <Link to="/" className="btn-nav">Inicio</Link>
-    <Link to="/mis-citas" className="btn-nav">Mis citas</Link>
-    <Link to="/reservar" className="btn-nav">Reservar cita</Link>
-    <button
-      className="btn-nav"
-      onClick={() => {
-        cerrarSesion();
-        navigate('/');
-      }}
-    >
-      Cerrar sesión
-    </button>
-  </div>
-</nav>
+  const grupos = clasificar(citas);
+  const lista = grupos[pestaña];
 
-    <section className="miscitas-hero">
-      <div className="miscitas-hero-texto">
-        <h1 className="miscitas-titulo">Mis citas</h1>
-        <p className="miscitas-subtitulo">
-          Consulta tus próximas citas, revisa tu historial o cancela una cita si lo necesitas.
-        </p>
-      </div>
-      <div className="miscitas-hero-imagen">
-        <img
-          src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=800&q=80"
-          alt="Consulta de fisioterapia"
-        />
-      </div>
-    </section>
+  return (
+    <Pagina titulo="Mis citas">
+      <CabeceraPagina
+        titulo="Mis citas"
+        subtitulo="Consulta tus próximas citas, revisa tu historial o cancela una cita si lo necesitas."
+      />
 
-    <section className="miscitas-panel">
-      <div className="miscitas-tabs">
-        <button
-          className={pestaña === 'proximas' ? "tab-activa" : "tab"}
-          onClick={() => setPestaña('proximas')}
-        >
-          Próximas citas
-        </button>
-        <button
-          className={pestaña === 'historial' ? "tab-activa" : "tab"}
-          onClick={() => setPestaña('historial')}
-        >
-          Historial
-        </button>
-        <button
-          className={pestaña === 'canceladas' ? "tab-activa" : "tab"}
-          onClick={() => setPestaña('canceladas')}
-        >
-          Canceladas
-        </button>
-      </div>
-
-      <p className="mensaje-feedback">{mensaje}</p>
-      <div className="miscitas-lista">
-        {citasFiltradas().length === 0 &&
-          <p className="miscitas-vacio">No hay citas en esta categoría.</p>
-        }
-        {citasFiltradas().map((item) =>
-          <div className="cita-card" key={item.id}>
-            <div className="cita-info">
-              <span className="cita-fecha">{item.datetime}</span>
-              <span className="cita-motivo">{item.motivo}</span>
+      <section className="contenedor panel-flotante">
+        <div className="tarjeta">
+          <div className="panel-cabecera">
+            <div className="pestañas" role="tablist">
+              {PESTAÑAS.map(({ id, nombre }) => (
+                <button
+                  key={id} type="button" role="tab" aria-selected={pestaña === id}
+                  className={pestaña === id ? 'pestaña activa' : 'pestaña'}
+                  onClick={() => { setPestaña(id); setAviso(null); }}
+                >
+                  {nombre} <span className="contador">{grupos[id].length}</span>
+                </button>
+              ))}
             </div>
-            {pestaña === 'proximas' &&
-              <button className="btn-cancelar" onClick={() => handleCancelar(item.id)}>
-                Cancelar cita
-              </button>
-            }
+            <Link to="/reservar" className="btn btn-primario btn-pequeno">
+              <CalendarPlus size={16} aria-hidden="true" /> Nueva cita
+            </Link>
           </div>
-        )}
-      </div>
-    </section>
-    <Footer />
-  </>
-  
-)
+
+          <Aviso tipo={aviso?.tipo}>{aviso?.texto}</Aviso>
+          {pestaña === 'proximas' && lista.length > 0 && (
+            <p className="texto-suave nota">Puedes cancelar una cita hasta 24 horas antes.</p>
+          )}
+
+          {cargando ? (
+            <p className="estado-vacio">Cargando tus citas…</p>
+          ) : lista.length === 0 ? (
+            <div className="estado-vacio">
+              <p>
+                {pestaña === 'proximas' && 'No tienes citas próximas.'}
+                {pestaña === 'historial' && 'Aún no tienes citas pasadas.'}
+                {pestaña === 'canceladas' && 'No tienes citas canceladas.'}
+              </p>
+              {pestaña === 'proximas' && <Link to="/reservar" className="btn btn-secundario">Reservar una cita</Link>}
+            </div>
+          ) : (
+            <div className="lista-citas">
+              {lista.map((cita) => (
+                <CitaCard
+                  key={cita.id}
+                  cita={cita}
+                  estado={pestaña === 'canceladas' ? 'Cancelada' : pestaña === 'historial' ? 'Realizada' : null}
+                  onCancelar={pestaña === 'proximas' ? handleCancelar : null}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+    </Pagina>
+  );
 }
-export default MisCitas
+
+export default MisCitas;

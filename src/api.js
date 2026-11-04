@@ -2,6 +2,9 @@ import { obtenerToken, cerrarSesion } from './sesion';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+// Mensaje para cuando ni siquiera se llega al servidor (sin internet, servidor caído...).
+export const ERROR_CONEXION = 'No se ha podido conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.';
+
 // Envoltorio de fetch para hablar con el backend:
 // - añade la URL base y la cabecera JSON
 // - añade el token si hay sesión ("Authorization: Bearer <token>")
