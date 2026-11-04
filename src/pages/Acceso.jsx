@@ -26,6 +26,10 @@ function Acceso() {
   const [usuarioPendiente, setUsuarioPendiente] = useState('');
   const [aviso, setAviso] = useState(null); // { tipo, texto }
   const [enviando, setEnviando] = useState(false);
+  // Formulario de "he olvidado mi contraseña" (sustituye a las pestañas mientras está abierto)
+  const [recuperando, setRecuperando] = useState(false);
+  const [emailRecuperar, setEmailRecuperar] = useState('');
+  const [enlaceEnviado, setEnlaceEnviado] = useState(false);
 
   // A dónde mandar a alguien con sesión: la fisio a su agenda; el paciente, a donde iba (o a reservar).
   const destino = (rol) => (rol === 'fisio' ? '/agenda' : desde && !desde.startsWith('/agenda') ? desde : '/reservar');
@@ -96,6 +100,21 @@ function Acceso() {
     setAviso({ tipo: response.ok ? 'info' : 'error', texto: await response.text() });
   });
 
+  const handleRecuperar = (e) => {
+    e.preventDefault();
+    enviar(async () => {
+      const response = await apiFetch('/recuperar', { method: 'POST', body: JSON.stringify({ email: emailRecuperar }) });
+      setAviso({ tipo: response.ok ? 'ok' : 'error', texto: await response.text() });
+      if (response.ok) setEnlaceEnviado(true);
+    });
+  };
+
+  function abrirRecuperar(abrir) {
+    setRecuperando(abrir);
+    setEnlaceEnviado(false);
+    setAviso(null);
+  }
+
   function cambiarPestaña(nueva) {
     setPestaña(nueva);
     setAviso(null);
@@ -104,7 +123,7 @@ function Acceso() {
   // Actualiza un campo del objeto de estado a partir del "name" del input.
   const campo = (setter) => (e) => setter((previo) => ({ ...previo, [e.target.name]: e.target.value }));
 
-  const titulo = esperandoCodigo ? 'Verifica tu email' : pestaña === 'login' ? 'Iniciar sesión' : 'Crear cuenta';
+  const titulo = esperandoCodigo ? 'Verifica tu email' : recuperando ? 'Recuperar contraseña' : pestaña === 'login' ? 'Iniciar sesión' : 'Crear cuenta';
 
   return (
     <Pagina titulo={titulo}>
@@ -155,6 +174,30 @@ function Acceso() {
                   Enviar otro código
                 </button>
               </form>
+            ) : recuperando ? (
+              <form onSubmit={handleRecuperar} className="formulario">
+                <h2>¿Has olvidado tu contraseña?</h2>
+                <p className="texto-suave">
+                  Escribe el correo con el que te registraste y te enviaremos un enlace para elegir una nueva.
+                  En el correo también te recordamos tu nombre de usuario.
+                </p>
+                <Aviso tipo={aviso?.tipo}>{aviso?.texto}</Aviso>
+                {!enlaceEnviado && (
+                  <>
+                    <div className="campo">
+                      <label htmlFor="recuperar-email">Correo electrónico</label>
+                      <input id="recuperar-email" type="email" value={emailRecuperar} required autoFocus
+                        onChange={(e) => setEmailRecuperar(e.target.value)} autoComplete="email" />
+                    </div>
+                    <button type="submit" className="btn btn-primario btn-bloque" disabled={enviando}>
+                      {enviando ? 'Enviando…' : 'Enviarme el enlace'}
+                    </button>
+                  </>
+                )}
+                <button type="button" className="btn-texto centrado" onClick={() => abrirRecuperar(false)}>
+                  Volver a iniciar sesión
+                </button>
+              </form>
             ) : (
               <>
                 <div className="pestañas" role="tablist">
@@ -191,9 +234,9 @@ function Acceso() {
                     <button type="submit" className="btn btn-primario btn-bloque" disabled={enviando}>
                       {enviando ? 'Entrando…' : 'Iniciar sesión'}
                     </button>
-                    <p className="texto-suave centrado">
-                      ¿Has olvidado la contraseña? Llama a la clínica y te ayudamos a recuperarla.
-                    </p>
+                    <button type="button" className="btn-texto centrado" onClick={() => abrirRecuperar(true)}>
+                      ¿Has olvidado tu contraseña o tu usuario?
+                    </button>
                   </form>
                 ) : (
                   <form onSubmit={handleRegistro} className="formulario">
