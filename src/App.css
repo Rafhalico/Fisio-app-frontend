@@ -78,14 +78,6 @@ a {
   font-size: 0.92rem;
 }
 
-.eyebrow {
-  color: var(--coral-texto);
-  font-weight: 600;
-  font-size: 0.8rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  margin-bottom: 0.6rem;
-}
 
 .saltar-contenido {
   position: absolute;
@@ -312,152 +304,13 @@ a {
   cursor: pointer;
 }
 
-/* =========================================================
-   INICIO
-   ========================================================= */
-.hero {
-  background:
-    radial-gradient(circle at 85% 20%, rgba(244, 162, 97, 0.22), transparent 45%),
-    linear-gradient(180deg, var(--crema) 0%, var(--crema-2) 100%);
-  padding: 4.5rem 0 5rem;
-}
-
-.hero-interior {
-  display: grid;
-  grid-template-columns: 1.05fr 1fr;
-  gap: 3.5rem;
-  align-items: center;
-}
-
-.hero-titulo {
-  font-size: clamp(2.4rem, 5vw, 3.6rem);
-  margin-bottom: 1.2rem;
-}
-
-.degradado {
-  background: linear-gradient(90deg, var(--vino), var(--coral));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.hero-descripcion {
-  color: var(--texto-suave);
-  font-size: 1.08rem;
-  max-width: 470px;
-  margin-bottom: 2rem;
-}
-
-.hero-botones {
-  display: flex;
-  gap: 0.9rem;
-  flex-wrap: wrap;
-}
-
-.hero-confianza {
-  list-style: none;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem 1.4rem;
-  margin-top: 1.8rem;
-  font-size: 0.88rem;
-  color: var(--texto-suave);
-}
-
-.hero-confianza li {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.hero-confianza svg {
-  color: var(--verde);
-}
-
-.hero-imagen {
-  position: relative;
-}
-
-.hero-imagen img {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 4 / 3.4;
-  object-fit: cover;
-  border-radius: 28px;
-  box-shadow: var(--sombra-alta);
-  background: var(--degradado); /* se ve si la foto tarda en cargar */
-}
-
-.hero-sello {
-  position: absolute;
-  left: -1.5rem;
-  bottom: 1.8rem;
-  display: flex;
-  flex-direction: column;
-  background: var(--blanco);
-  padding: 1rem 1.3rem;
-  border-radius: var(--radio);
-  box-shadow: var(--sombra-alta);
-  font-family: var(--fuente-titulos);
-  color: var(--texto);
-  font-size: 1rem;
-  line-height: 1.3;
-}
-
-.hero-sello strong {
-  font-weight: 400;
-  font-size: 1.3rem;
-  color: var(--vino);
-}
-
-.seccion {
-  padding: 5rem 0;
-}
-
-.seccion-suave {
-  background-color: var(--blanco);
-  border-top: 1px solid var(--borde);
-  border-bottom: 1px solid var(--borde);
-}
-
-.titulo-seccion {
-  text-align: center;
-  font-size: clamp(1.8rem, 3.5vw, 2.4rem);
-  margin-bottom: 2.8rem;
-}
-
+/* Piezas comunes */
 .tarjeta {
   background-color: var(--blanco);
   border: 1px solid var(--borde);
   border-radius: var(--radio);
   padding: 1.8rem;
   box-shadow: var(--sombra);
-}
-
-.servicios {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.4rem;
-}
-
-.servicio {
-  transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.servicio:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--sombra-alta);
-}
-
-.servicio h3 {
-  font-size: 1.2rem;
-  color: var(--texto);
-  margin: 1rem 0 0.5rem;
-}
-
-.servicio p {
-  color: var(--texto-suave);
-  font-size: 0.92rem;
 }
 
 .icono-circulo {
@@ -476,93 +329,321 @@ a {
   height: 72px;
 }
 
-.pasos {
+/* =========================================================
+   INICIO
+   ========================================================= */
+.portada {
+  padding: 4.5rem 0 5rem;
+  background-color: var(--crema);
+  border-bottom: 1px solid var(--borde);
+}
+
+.portada-interior {
+  display: grid;
+  grid-template-columns: 1.2fr minmax(300px, 400px);
+  gap: 4rem;
+  align-items: center;
+}
+
+.portada-titulo {
+  font-size: clamp(2.5rem, 5.4vw, 4.2rem);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  max-width: 13ch;
+  margin-bottom: 1.4rem;
+}
+
+.portada-descripcion {
+  color: var(--texto-suave);
+  font-size: 1.1rem;
+  max-width: 34rem;
+  margin-bottom: 2rem;
+}
+
+.portada-botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-bottom: 1.4rem;
+}
+
+/* Indicador abierto / cerrado */
+.estado-clinica {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.88rem;
+  color: var(--texto-suave);
+}
+
+.estado-punto {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background-color: #B5ABA1;
+}
+
+.estado-clinica.abierto {
+  color: var(--verde);
+  font-weight: 500;
+}
+
+.estado-clinica.abierto .estado-punto {
+  background-color: var(--verde);
+  box-shadow: 0 0 0 4px rgba(46, 125, 79, 0.15);
+}
+
+/* Tarjeta de próximos huecos (el elemento protagonista de la portada) */
+.huecos {
+  background-color: var(--blanco);
+  border: 1px solid var(--borde);
+  border-top: 4px solid var(--vino);
+  border-radius: 6px 6px 20px 20px;
+  padding: 1.6rem;
+  box-shadow: 0 24px 50px -24px rgba(166, 38, 57, 0.35);
+}
+
+.huecos-titulo {
+  font-size: 1.35rem;
+  color: var(--texto);
+  margin-bottom: 0.9rem;
+}
+
+.huecos-dias {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.1rem;
+}
+
+.huecos-dia {
+  padding: 0.9rem 0;
+  border-top: 1px solid var(--borde);
+}
+
+.huecos-dia h3 {
+  font-family: var(--fuente-texto);
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--texto);
+  margin-bottom: 0.55rem;
+}
+
+.huecos-dia ul {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.hueco {
+  display: inline-block;
+  min-width: 4.4rem;
+  padding: 0.45rem 0.7rem;
+  border: 1.5px solid var(--borde);
+  border-radius: var(--radio-pequeno);
+  color: var(--vino);
+  font-family: var(--fuente-titulos);
+  font-size: 1.15rem;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  transition: border-color 0.15s, background-color 0.15s, color 0.15s;
+}
+
+.hueco:hover {
+  border-color: var(--vino);
+  background-color: var(--vino);
+  color: var(--blanco);
+}
+
+.hueco-mas {
+  min-width: 0;
+  font-family: var(--fuente-texto);
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.6rem 0.8rem;
+  color: var(--texto-suave);
+}
+
+.huecos-dia.cargando {
+  height: 82px;
+  margin: 0.4rem 0;
+  border: none;
+  border-radius: var(--radio-pequeno);
+  background: linear-gradient(90deg, var(--gris-claro) 25%, var(--crema-2) 50%, var(--gris-claro) 75%);
+  background-size: 200% 100%;
+  animation: brillo 1.4s infinite linear;
+}
+
+@keyframes brillo {
+  to { background-position: -200% 0; }
+}
+
+.huecos-vacio {
+  color: var(--texto-suave);
+  font-size: 0.93rem;
+  margin-bottom: 1.1rem;
+}
+
+.huecos-mas {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--vino);
+  text-underline-offset: 3px;
+}
+
+.seccion {
+  padding: 5.5rem 0;
+}
+
+.seccion-blanca {
+  background-color: var(--blanco);
+  border-top: 1px solid var(--borde);
+  border-bottom: 1px solid var(--borde);
+}
+
+.titulo-seccion {
+  font-size: clamp(1.9rem, 3.5vw, 2.6rem);
+  margin-bottom: 3rem;
+}
+
+/* Servicios: texto e imagen a la izquierda, lista a la derecha */
+.servicios-bloque {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 4.5rem;
+  align-items: start;
+}
+
+.servicios-intro h2 {
+  font-size: clamp(1.9rem, 3.5vw, 2.6rem);
+  margin-bottom: 1rem;
+}
+
+.servicios-intro p {
+  color: var(--texto-suave);
+  max-width: 30rem;
+  margin-bottom: 2rem;
+}
+
+.servicios-intro img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 10 / 7;
+  object-fit: cover;
+  border-radius: 6px 6px 120px 6px;
+  background-color: var(--crema-2);
+}
+
+.servicios-lista {
+  list-style: none;
+}
+
+.servicios-lista li {
+  display: flex;
+  gap: 1.3rem;
+  padding: 1.7rem 0;
+  border-bottom: 1px solid var(--borde);
+}
+
+.servicios-lista li:first-child {
+  padding-top: 0.4rem;
+}
+
+.servicio-icono {
+  flex-shrink: 0;
+  color: var(--vino);
+  margin-top: 0.2rem;
+}
+
+.servicios-lista h3 {
+  font-size: 1.4rem;
+  color: var(--texto);
+  margin-bottom: 0.3rem;
+}
+
+.servicios-lista p {
+  color: var(--texto-suave);
+}
+
+/* Pasos unidos por una línea */
+.linea-pasos {
   list-style: none;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  margin-bottom: 2.5rem;
-  counter-reset: paso;
-}
-
-.paso {
+  gap: 2.5rem;
+  margin-bottom: 3rem;
   position: relative;
-  text-align: center;
-  padding: 2rem 1.5rem;
 }
 
-.paso-icono {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 72px;
-  height: 72px;
-  margin-bottom: 1rem;
-  border-radius: 50%;
-  background-color: var(--crema-2);
-  color: var(--vino);
-}
-
-.paso-numero {
+.linea-pasos::before {
+  content: '';
   position: absolute;
-  top: -4px;
-  right: -4px;
+  top: 22px;
+  left: 23px;
+  right: calc((100% - 5rem) / 3 - 23px);
+  height: 2px;
+  background-color: var(--borde);
+}
+
+.linea-pasos li {
+  position: relative;
+}
+
+.linea-numero {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 46px;
+  height: 46px;
+  margin-bottom: 1.2rem;
   border-radius: 50%;
-  border: 3px solid var(--blanco);
-  background: var(--degradado);
+  background-color: var(--vino);
   color: var(--blanco);
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.paso h3 {
-  font-size: 1.25rem;
-  color: var(--texto);
-  margin-bottom: 0.4rem;
-}
-
-.paso p {
-  color: var(--texto-suave);
-  font-size: 0.93rem;
-  max-width: 290px;
-  margin: 0 auto;
-}
-
-.info-clinica {
-  display: grid;
-  grid-template-columns: 1.3fr 1fr;
-  gap: 1.5rem;
-  max-width: 900px;
-  margin: 0 auto;
-}
-
-.tarjeta-titulo {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  font-family: var(--fuente-titulos);
   font-size: 1.3rem;
+  box-shadow: 0 0 0 7px var(--blanco);
+}
+
+.linea-pasos h3 {
+  font-size: 1.35rem;
+  color: var(--texto);
+  margin-bottom: 0.35rem;
+}
+
+.linea-pasos p {
+  color: var(--texto-suave);
+  max-width: 19rem;
+}
+
+/* Horario y ubicación */
+.visita {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 4.5rem;
+}
+
+.visita h2 {
+  font-size: clamp(1.7rem, 3vw, 2.2rem);
+  margin-bottom: 0.6rem;
+}
+
+.visita .estado-clinica {
   margin-bottom: 1.2rem;
 }
 
 .tabla-horario {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.93rem;
 }
 
-.tabla-horario tr + tr {
-  border-top: 1px solid var(--borde);
+.tabla-horario tr {
+  border-bottom: 1px solid var(--borde);
 }
 
 .tabla-horario th,
 .tabla-horario td {
-  padding: 0.65rem 0;
+  padding: 0.8rem 0.6rem;
   vertical-align: top;
 }
 
@@ -584,28 +665,72 @@ a {
   color: var(--vino);
 }
 
+.tabla-horario tr.hoy {
+  background-color: var(--crema-2);
+}
+
+.tabla-horario tr.hoy td {
+  color: var(--texto);
+}
+
+.marca-hoy {
+  margin-left: 0.6rem;
+  padding: 0.05rem 0.55rem;
+  border-radius: 999px;
+  background-color: var(--vino);
+  color: var(--blanco);
+  font-size: 0.72rem;
+  font-weight: 500;
+  vertical-align: 0.1em;
+}
+
 .direccion {
-  font-size: 1.05rem;
-  margin-bottom: 1.4rem;
+  display: flex;
+  gap: 0.7rem;
+  font-size: 1.1rem;
+  margin: 1rem 0 1.6rem;
+}
+
+.direccion svg {
+  flex-shrink: 0;
+  margin-top: 0.3rem;
+  color: var(--vino);
+}
+
+.botones-fila.izquierda {
+  justify-content: flex-start;
 }
 
 .cta-final {
-  background: var(--degradado);
+  background-color: var(--vino);
   color: var(--blanco);
-  text-align: center;
   padding: 4rem 0;
+}
+
+.cta-interior {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
 }
 
 .cta-final h2 {
   color: var(--blanco);
-  font-size: clamp(1.8rem, 3.5vw, 2.4rem);
-  margin-bottom: 0.5rem;
+  font-size: clamp(1.7rem, 3.2vw, 2.4rem);
+  max-width: 20ch;
 }
 
-.cta-final p {
-  opacity: 0.9;
-  margin-bottom: 1.6rem;
+.btn-borde-blanco {
+  background-color: transparent;
+  color: var(--blanco);
+  border-color: rgba(255, 255, 255, 0.55);
 }
+
+.btn-borde-blanco:hover {
+  border-color: var(--blanco);
+}
+
 
 /* =========================================================
    PÁGINAS INTERIORES (cabecera y panel)
@@ -839,55 +964,118 @@ textarea::placeholder {
    ACCESO
    ========================================================= */
 .acceso {
+  padding: 4.5rem 0 5.5rem;
   background:
-    radial-gradient(circle at 10% 90%, rgba(244, 162, 97, 0.2), transparent 45%),
-    linear-gradient(180deg, var(--crema) 0%, var(--crema-2) 100%);
-  padding: 4rem 0 5rem;
+    linear-gradient(90deg, var(--crema) 0%, var(--crema) 50%, var(--crema-2) 50%, var(--crema-2) 100%);
 }
 
 .acceso-interior {
   display: grid;
-  grid-template-columns: 1fr minmax(320px, 460px);
-  gap: 4rem;
-  align-items: center;
+  grid-template-columns: 1fr minmax(320px, 480px);
+  grid-template-areas:
+    "intro    tarjeta"
+    "telefono tarjeta";
+  grid-template-rows: auto 1fr;
+  column-gap: 5rem;
+  align-items: start;
+}
+
+.acceso-intro {
+  grid-area: intro;
+  padding-top: 1.5rem;
+}
+
+.acceso-telefono {
+  grid-area: telefono;
+}
+
+.acceso-tarjeta {
+  grid-area: tarjeta;
 }
 
 .acceso-intro h1 {
-  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-size: clamp(2.3rem, 4.6vw, 3.4rem);
+  line-height: 1.08;
   margin-bottom: 1rem;
 }
 
 .acceso-subtitulo {
   color: var(--texto-suave);
-  max-width: 440px;
-  margin-bottom: 2rem;
+  font-size: 1.05rem;
+  max-width: 28rem;
+  margin-bottom: 2.8rem;
 }
 
-.acceso-beneficios {
-  list-style: none;
+.acceso-telefono {
   display: flex;
   flex-direction: column;
-  gap: 0.9rem;
+  align-items: flex-start;
+  gap: 0.45rem;
+  padding-left: 1.2rem;
+  border-left: 3px solid var(--vino);
 }
 
-.acceso-beneficios li {
-  display: flex;
+.acceso-telefono p {
+  color: var(--texto-suave);
+}
+
+.acceso-numero {
+  display: inline-flex;
   align-items: center;
-  gap: 0.7rem;
-  font-weight: 500;
+  gap: 0.6rem;
+  font-family: var(--fuente-titulos);
+  font-size: 2rem;
+  line-height: 1.1;
+  color: var(--vino);
+  text-decoration: none;
 }
 
-.acceso-beneficios svg {
-  color: var(--coral);
+.acceso-numero:hover {
+  text-decoration: underline;
+  text-underline-offset: 6px;
+  text-decoration-thickness: 2px;
 }
 
 .acceso-tarjeta {
+  background-color: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: 20px;
   padding: 2rem;
+  box-shadow: 0 24px 50px -28px rgba(166, 38, 57, 0.3);
 }
 
 .acceso-tarjeta h2 {
-  font-size: 1.6rem;
+  font-size: 1.7rem;
 }
+
+/* Input con botón dentro (mostrar contraseña) */
+.input-con-boton {
+  position: relative;
+}
+
+.input-con-boton input {
+  padding-right: 3rem;
+}
+
+.input-boton {
+  position: absolute;
+  top: 50%;
+  right: 0.4rem;
+  transform: translateY(-50%);
+  display: flex;
+  padding: 0.5rem;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: var(--texto-suave);
+  cursor: pointer;
+}
+
+.input-boton:hover {
+  color: var(--vino);
+  background-color: var(--crema);
+}
+
 
 /* =========================================================
    CALENDARIO
@@ -1392,30 +1580,34 @@ textarea::placeholder {
    ADAPTACIÓN A TABLET Y MÓVIL
    ========================================================= */
 @media (max-width: 980px) {
-  .servicios {
-    grid-template-columns: repeat(2, 1fr);
-  }
   .footer-columnas {
     grid-template-columns: repeat(2, 1fr);
   }
+  .portada-interior,
+  .servicios-bloque,
+  .visita {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+  .huecos {
+    max-width: 480px;
+  }
+  .servicios-intro img {
+    max-height: 320px;
+  }
+  .acceso {
+    background: var(--crema);
+  }
   .acceso-interior {
     grid-template-columns: 1fr;
-    gap: 2.5rem;
+    grid-template-areas: "intro" "tarjeta" "telefono";
+    row-gap: 2rem;
   }
   .acceso-intro {
-    text-align: center;
+    padding-top: 0;
   }
   .acceso-subtitulo {
-    margin-left: auto;
-    margin-right: auto;
-  }
-  .acceso-beneficios {
-    align-items: center;
-  }
-  .acceso-tarjeta {
-    width: 100%;
-    max-width: 480px;
-    margin: 0 auto;
+    margin-bottom: 0;
   }
 }
 
@@ -1457,26 +1649,32 @@ textarea::placeholder {
     justify-content: space-between;
   }
 
-  .hero {
-    padding: 3rem 0 4rem;
-  }
-  .hero-interior {
-    grid-template-columns: 1fr;
-    gap: 2.5rem;
-  }
-  .hero-sello {
-    left: 1rem;
-    bottom: 1rem;
+  .portada {
+    padding: 3rem 0 3.5rem;
   }
   .seccion {
-    padding: 3.5rem 0;
+    padding: 4rem 0;
   }
-  .pasos {
+  /* Pasos en vertical, con la línea a la izquierda */
+  .linea-pasos {
     grid-template-columns: 1fr;
-    gap: 0.5rem;
+    gap: 1.8rem;
   }
-  .info-clinica {
-    grid-template-columns: 1fr;
+  .linea-pasos::before {
+    top: 22px;
+    bottom: 22px;
+    left: 22px;
+    right: auto;
+    width: 2px;
+    height: auto;
+  }
+  .linea-pasos li {
+    padding-left: 4.2rem;
+  }
+  .linea-numero {
+    position: absolute;
+    left: 0;
+    top: 0;
   }
   .panel-dos-columnas {
     grid-template-columns: 1fr;
@@ -1492,17 +1690,16 @@ textarea::placeholder {
   .contenedor {
     padding: 0 1rem;
   }
-  .tarjeta {
+  .tarjeta,
+  .acceso-tarjeta,
+  .huecos {
     padding: 1.3rem;
-  }
-  .servicios {
-    grid-template-columns: 1fr;
   }
   .footer-columnas {
     grid-template-columns: 1fr;
     gap: 2rem;
   }
-  .hero-botones .btn {
+  .portada-botones .btn {
     flex: 1;
   }
   .campos-fila {
@@ -1526,5 +1723,8 @@ textarea::placeholder {
   }
   .confirmar-cancelacion {
     justify-content: flex-end;
+  }
+  .acceso-numero {
+    font-size: 1.7rem;
   }
 }

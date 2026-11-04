@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { obtenerUsuario } from '../sesion';
 
 // Envuelve una página que necesita sesión (y opcionalmente un rol concreto).
@@ -7,9 +7,11 @@ import { obtenerUsuario } from '../sesion';
 // Es solo comodidad para el usuario: la seguridad real la pone el backend.
 function RutaProtegida({ rol, children }) {
   const usuario = obtenerUsuario();
+  const location = useLocation();
 
   if (!usuario) {
-    return <Navigate to="/acceso" replace />;
+    // Guardamos a dónde quería ir (con su ?fecha=...&hora=...) para volver tras el login.
+    return <Navigate to="/acceso" replace state={{ desde: location.pathname + location.search }} />;
   }
 
   if (rol && usuario.rol !== rol) {

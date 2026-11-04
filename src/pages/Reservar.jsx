@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { CalendarCheck, Clock } from 'lucide-react';
 import Pagina, { CabeceraPagina } from '../components/Pagina';
 import Calendario from '../components/Calendario';
@@ -11,12 +11,23 @@ import { aDate, hoyTexto, formatearDia, capitalizar } from '../utils/fechas';
 // El calendario solo deja elegir los días que abre la clínica.
 const esDiaDeApertura = (fecha) => DIAS_ABIERTO.includes(aDate(fecha).getDay());
 
+// Si se llega desde un hueco del inicio (/reservar?fecha=2026-11-10&hora=10:30),
+// se preselecciona; si la fecha no es válida, pasada o un día cerrado, se ignora.
+function huecoDeLaUrl(params) {
+  const fecha = params.get('fecha') || '';
+  const hora = params.get('hora') || '';
+  const valida = /^\d{4}-\d{2}-\d{2}$/.test(fecha) && fecha >= hoyTexto() && esDiaDeApertura(fecha);
+  return valida ? { fecha, hora: /^\d{2}:\d{2}$/.test(hora) ? hora : '' } : { fecha: '', hora: '' };
+}
+
 function Reservar() {
-  const [fecha, setFecha] = useState('');
+  const [params] = useSearchParams();
+  const [inicial] = useState(() => huecoDeLaUrl(params));
+  const [fecha, setFecha] = useState(inicial.fecha);
   const [horas, setHoras] = useState([]);
-  const [cargando, setCargando] = useState(false);
+  const [cargando, setCargando] = useState(Boolean(inicial.fecha));
   const [errorHoras, setErrorHoras] = useState('');
-  const [horaSeleccionada, setHoraSeleccionada] = useState('');
+  const [horaSeleccionada, setHoraSeleccionada] = useState(inicial.hora);
   const [motivo, setMotivo] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [aviso, setAviso] = useState('');
@@ -52,6 +63,10 @@ function Reservar() {
           lista = lista.filter((h) => aDate(`${fecha} ${h.hora}`) > ahora);
         }
         setHoras(lista);
+        // Si la hora preseleccionada ya no está libre (alguien la ha cogido), se quita.
+        setHoraSeleccionada((hora) =>
+          lista.some((h) => h.hora === hora && h.huecosLibres > 0) ? hora : ''
+        );
       })
       .catch(() => activo && setErrorHoras(ERROR_CONEXION))
       .finally(() => activo && setCargando(false));

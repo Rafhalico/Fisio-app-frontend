@@ -1,9 +1,8 @@
 import { Link } from 'react-router-dom';
-import {
-  HandHeart, Activity, Sparkles, CalendarCheck, Check,
-  UserPlus, CalendarDays, Smile, MapPin, Phone, Clock, Navigation
-} from 'lucide-react';
+import { HandHeart, Activity, Sparkles, CalendarCheck, MapPin, Phone, Navigation } from 'lucide-react';
 import Pagina from '../components/Pagina';
+import ProximosHuecos from '../components/ProximosHuecos';
+import EstadoClinica from '../components/EstadoClinica';
 import { CLINICA, HORARIO } from '../datos/clinica';
 
 const servicios = [
@@ -13,137 +12,135 @@ const servicios = [
   { icono: CalendarCheck, titulo: 'Cita online', texto: 'Reserva tu cita de forma rápida y sencilla cuando quieras.' },
 ];
 
+// Estos sí son una secuencia, por eso van numerados.
 const pasos = [
-  { icono: UserPlus, titulo: 'Crea tu cuenta', texto: 'Solo necesitas tu nombre, teléfono y email. Tardas un minuto.' },
-  { icono: CalendarDays, titulo: 'Elige día y hora', texto: 'Mira los huecos libres en tiempo real y reserva el que mejor te venga.' },
-  { icono: Smile, titulo: 'Ven a tu sesión', texto: 'Te esperamos en la clínica. Si te surge algo, cancela desde la web.' },
+  { titulo: 'Crea tu cuenta', texto: 'Con tu nombre, teléfono y email. Te enviamos un código para confirmarla.' },
+  { titulo: 'Elige día y hora', texto: 'Ves los huecos libres al momento y reservas el que te venga mejor.' },
+  { titulo: 'Ven a tu sesión', texto: 'Si te surge algo, cancélala desde la web hasta 24 horas antes.' },
 ];
 
 function Inicio() {
+  const hoy = new Date().getDay();
+
   return (
     <Pagina>
-      <section className="hero">
-        <div className="contenedor hero-interior">
-          <div className="hero-texto">
-            <p className="eyebrow">Fisioterapia en Gilena</p>
-            <h1 className="hero-titulo">
-              Recupera tu <span className="degradado">bienestar</span>
-            </h1>
-            <p className="hero-descripcion">
-              Fisioterapia personalizada para aliviar el dolor, mejorar tu
-              movilidad y ayudarte a sentirte mejor cada día.
+      <section className="portada">
+        <div className="contenedor portada-interior">
+          <div className="portada-texto">
+            <h1 className="portada-titulo">Fisioterapia cercana, aquí en Gilena</h1>
+            <p className="portada-descripcion">
+              Te atendemos en persona para aliviar el dolor, recuperarte de una lesión
+              y moverte mejor. Reserva tu sesión online en un minuto o llámanos.
             </p>
-            <div className="hero-botones">
+            <div className="portada-botones">
               <Link to="/reservar" className="btn btn-primario">Reservar cita</Link>
               <a href={CLINICA.telefonoEnlace} className="btn btn-secundario">
                 <Phone size={18} aria-hidden="true" /> {CLINICA.telefono}
               </a>
             </div>
-            <ul className="hero-confianza">
-              <li><Check size={16} aria-hidden="true" /> Atención personalizada</li>
-              <li><Check size={16} aria-hidden="true" /> Profesional especializada</li>
-              <li><Check size={16} aria-hidden="true" /> Cercana y de confianza</li>
-            </ul>
+            <EstadoClinica />
           </div>
 
-          <div className="hero-imagen">
-            <img
-              src="https://images.unsplash.com/photo-1519823551278-64ac92734fb1?w=900&q=80"
-              alt="Fisioterapeuta tratando la espalda de una paciente"
-              width="900"
-              height="600"
-              fetchPriority="high"
-            />
-            <div className="hero-sello">
-              <span>Tu salud es nuestra</span>
-              <strong>prioridad</strong>
-            </div>
-          </div>
+          <ProximosHuecos />
         </div>
       </section>
 
       <section className="seccion" aria-labelledby="titulo-servicios">
-        <div className="contenedor">
-          <p className="eyebrow centrado">Servicios</p>
-          <h2 id="titulo-servicios" className="titulo-seccion">Cómo podemos ayudarte</h2>
-          <div className="servicios">
-            {servicios.map(({ icono: Icono, titulo, texto }) => (
-              <article className="tarjeta servicio" key={titulo}>
-                <span className="icono-circulo"><Icono size={24} aria-hidden="true" /></span>
-                <h3>{titulo}</h3>
-                <p>{texto}</p>
-              </article>
-            ))}
+        <div className="contenedor servicios-bloque">
+          <div className="servicios-intro">
+            <h2 id="titulo-servicios">Cómo podemos ayudarte</h2>
+            <p>
+              Cada sesión empieza escuchándote: qué te duele, desde cuándo y qué quieres
+              volver a hacer. A partir de ahí preparamos un tratamiento a tu medida.
+            </p>
+            <img
+              src="https://images.unsplash.com/photo-1519823551278-64ac92734fb1?w=800&q=80"
+              alt="Fisioterapeuta tratando la espalda de una paciente"
+              width="800" height="560" loading="lazy"
+            />
           </div>
+
+          <ul className="servicios-lista">
+            {servicios.map(({ icono: Icono, titulo, texto }) => (
+              <li key={titulo}>
+                <Icono size={26} className="servicio-icono" aria-hidden="true" />
+                <div>
+                  <h3>{titulo}</h3>
+                  <p>{texto}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
-      <section className="seccion seccion-suave" aria-labelledby="titulo-pasos">
+      <section className="seccion seccion-blanca" aria-labelledby="titulo-pasos">
         <div className="contenedor">
-          <p className="eyebrow centrado">Cita online</p>
-          <h2 id="titulo-pasos" className="titulo-seccion">Reservar es muy fácil</h2>
-          <ol className="pasos">
-            {pasos.map(({ icono: Icono, titulo, texto }, i) => (
-              <li className="paso" key={titulo}>
-                <span className="paso-icono">
-                  <Icono size={28} aria-hidden="true" />
-                  <span className="paso-numero">{i + 1}</span>
-                </span>
+          <h2 id="titulo-pasos" className="titulo-seccion">Así se reserva online</h2>
+          <ol className="linea-pasos">
+            {pasos.map(({ titulo, texto }, i) => (
+              <li key={titulo}>
+                <span className="linea-numero">{i + 1}</span>
                 <h3>{titulo}</h3>
                 <p>{texto}</p>
               </li>
             ))}
           </ol>
-          <div className="centrado">
-            <Link to="/reservar" className="btn btn-primario">Empezar ahora</Link>
-          </div>
+          <p className="centrado">
+            <Link to="/reservar" className="btn btn-primario">Reservar cita</Link>
+          </p>
         </div>
       </section>
 
       <section className="seccion" aria-labelledby="titulo-visitanos">
-        <div className="contenedor">
-          <p className="eyebrow centrado">Visítanos</p>
-          <h2 id="titulo-visitanos" className="titulo-seccion">Horario y ubicación</h2>
-          <div className="info-clinica">
-            <div className="tarjeta">
-              <h3 className="tarjeta-titulo"><Clock size={20} aria-hidden="true" /> Horario</h3>
-              <table className="tabla-horario">
-                <tbody>
-                  {HORARIO.map(({ dia, franjas }) => (
-                    <tr key={dia}>
-                      <th scope="row">{dia}</th>
+        <div className="contenedor visita">
+          <div>
+            <h2 id="titulo-visitanos">Horario</h2>
+            <EstadoClinica />
+            <table className="tabla-horario">
+              <tbody>
+                {HORARIO.map(({ dia, numeros, franjas }) => {
+                  const esHoy = numeros.includes(hoy);
+                  return (
+                    <tr key={dia} className={esHoy ? 'hoy' : undefined} aria-current={esHoy ? 'date' : undefined}>
+                      <th scope="row">{dia}{esHoy && <span className="marca-hoy">hoy</span>}</th>
                       <td className={franjas.length ? '' : 'cerrado'}>
                         {franjas.length ? franjas.map((f) => <span key={f}>{f}</span>) : 'Cerrado'}
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
 
-            <div className="tarjeta">
-              <h3 className="tarjeta-titulo"><MapPin size={20} aria-hidden="true" /> Dónde estamos</h3>
-              <p className="direccion">
-                {CLINICA.direccion}<br />{CLINICA.localidad}
-              </p>
-              <div className="botones-columna">
-                <a href={CLINICA.mapa} target="_blank" rel="noopener noreferrer" className="btn btn-secundario">
-                  <Navigation size={18} aria-hidden="true" /> Cómo llegar
-                </a>
-                <a href={CLINICA.telefonoEnlace} className="btn btn-secundario">
-                  <Phone size={18} aria-hidden="true" /> Llamar a la clínica
-                </a>
-              </div>
+          <div>
+            <h2>Dónde estamos</h2>
+            <p className="direccion">
+              <MapPin size={20} aria-hidden="true" />
+              <span>{CLINICA.direccion}<br />{CLINICA.localidad}</span>
+            </p>
+            <div className="botones-fila izquierda">
+              <a href={CLINICA.mapa} target="_blank" rel="noopener noreferrer" className="btn btn-secundario">
+                <Navigation size={18} aria-hidden="true" /> Cómo llegar
+              </a>
+              <a href={CLINICA.telefonoEnlace} className="btn btn-secundario">
+                <Phone size={18} aria-hidden="true" /> Llamar
+              </a>
             </div>
           </div>
         </div>
       </section>
 
       <section className="cta-final">
-        <div className="contenedor">
-          <h2>¿Empezamos a cuidarte?</h2>
-          <p>Reserva tu cita online en menos de un minuto.</p>
-          <Link to="/reservar" className="btn btn-blanco">Reservar cita</Link>
+        <div className="contenedor cta-interior">
+          <h2>¿Te duele algo? No lo dejes para más adelante.</h2>
+          <div className="botones-fila">
+            <Link to="/reservar" className="btn btn-blanco">Reservar cita</Link>
+            <a href={CLINICA.telefonoEnlace} className="btn btn-borde-blanco">
+              <Phone size={18} aria-hidden="true" /> Llamar
+            </a>
+          </div>
         </div>
       </section>
     </Pagina>

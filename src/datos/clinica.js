@@ -12,16 +12,27 @@ export const CLINICA = {
   mapa: 'https://www.google.com/maps/place/Fisioterapia+Mar%C3%ADa+Monta%C3%B1o/@37.2515137,-4.9153176,19z',
 };
 
+// Franjas de apertura por día, con la numeración de Date.getDay():
+// 0 = domingo, 1 = lunes ... 6 = sábado.
 // IMPORTANTE: debe coincidir con "horarios" del backend (index.js),
 // que es quien decide de verdad qué horas se pueden reservar.
-export const HORARIO = [
-  { dia: 'Lunes', franjas: ['16:00 – 21:00'] },
-  { dia: 'Martes', franjas: ['09:30 – 13:30', '16:00 – 21:00'] },
-  { dia: 'Miércoles', franjas: ['10:00 – 14:00', '16:00 – 21:00'] },
-  { dia: 'Jueves', franjas: ['09:30 – 13:30', '16:00 – 21:00'] },
-  { dia: 'Viernes', franjas: ['09:00 – 14:00'] },
-  { dia: 'Sábado y domingo', franjas: [] },
-];
+export const FRANJAS = {
+  1: [['16:00', '21:00']],
+  2: [['09:30', '13:30'], ['16:00', '21:00']],
+  3: [['10:00', '14:00'], ['16:00', '21:00']],
+  4: [['09:30', '13:30'], ['16:00', '21:00']],
+  5: [['09:00', '14:00']],
+};
 
-// Días que abre, con la numeración de Date.getDay(): 0 = domingo ... 6 = sábado
-export const DIAS_ABIERTO = [1, 2, 3, 4, 5];
+export const DIAS_ABIERTO = Object.keys(FRANJAS).map(Number);
+
+// Horario para mostrar (tabla del inicio y pie de página)
+const nombreDia = { 1: 'Lunes', 2: 'Martes', 3: 'Miércoles', 4: 'Jueves', 5: 'Viernes' };
+export const HORARIO = [
+  ...DIAS_ABIERTO.map((n) => ({
+    dia: nombreDia[n],
+    numeros: [n],
+    franjas: FRANJAS[n].map(([inicio, fin]) => `${inicio} – ${fin}`),
+  })),
+  { dia: 'Sábado y domingo', numeros: [6, 0], franjas: [] },
+];
