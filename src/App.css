@@ -1708,6 +1708,28 @@ input[type="date"] {
 }
 
 /* =========================================================
+   RESTABLECER CONTRASEÑA
+   ========================================================= */
+.restablecer {
+  display: flex;
+  justify-content: center;
+}
+
+.restablecer .acceso-tarjeta {
+  width: 100%;
+  max-width: 460px;
+}
+
+.restablecer h1 {
+  font-size: 1.8rem;
+}
+
+.centrado-bloque {
+  align-items: center;
+  text-align: center;
+}
+
+/* =========================================================
    ADAPTACIÓN A TABLET Y MÓVIL
    ========================================================= */
 @media (max-width: 980px) {
