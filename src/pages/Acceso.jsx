@@ -1,212 +1,254 @@
-import {useState} from 'react';
-import {useNavigate} from 'react-router-dom';
-import {Link} from 'react-router-dom';
-import Footer from '../components/Footer';
+import { useState } from 'react';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Phone } from 'lucide-react';
+import Pagina from '../components/Pagina';
+import Aviso from '../components/Aviso';
+import CampoContraseña from '../components/CampoContraseña';
+import EstadoClinica from '../components/EstadoClinica';
+import { apiFetch, ERROR_CONEXION } from '../api';
+import { guardarSesion, obtenerUsuario } from '../sesion';
+import { CLINICA } from '../datos/clinica';
+
+const registroVacio = { nombre: '', apellidos: '', nombreusuario: '', email: '', telefono: '', contraseña: '' };
 
 function Acceso() {
-    const [nombreusuario, setNombreusuario] = useState('');
-    const [contraseña, setContraseña] = useState('');
-    const [mensaje, setMensaje] = useState('');
-    const navigate = useNavigate();
-    const [nombreReg, setNombreReg] = useState('');
-    const [apellidosReg, setApellidosReg] = useState('');
-    const [nombreusuarioReg, setNombreusuarioReg] = useState('');
-    const [contraseñaReg, setContraseñaReg] = useState('');
-    const [telefonoReg, setTelefonoReg] = useState('');
-    const [emailReg, setEmailReg] = useState('');
-    const [mensajeRegistro, setMensajeRegistro] = useState('');
-    const [esperandoCodigo, setEsperandoCodigo] = useState(false);
-    const [codigoIngresado, setCodigoIngresado] = useState('');
-    const [nombreusuarioRegistrado, setNombreusuarioRegistrado] = useState('');
+  const navigate = useNavigate();
+  const location = useLocation();
+  // Página a la que quería ir antes de que le pidiéramos iniciar sesión (p. ej. /reservar?fecha=...)
+  const desde = location.state?.desde;
+  const veniaDeReservar = desde?.startsWith('/reservar');
 
-async function handleLogin(){
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/login`, {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({nombreusuario, contraseña})
-    });
-    if (!response.ok) {
-        const errorTexto = await response.text();
-        setMensaje(errorTexto);
-        return;
-    }
-        const data = await response.json();
-        localStorage.setItem('usuario', JSON.stringify(data));
-        setMensaje('Inicio de sesión exitoso');
-        
-      
-    if (data.rol === 'fisio') {
-      navigate('/agenda');
-    
-    } else {
-      navigate('/reservar');
-    }
+  const [pestaña, setPestaña] = useState('login'); // 'login' | 'registro'
+  const [login, setLogin] = useState({ nombreusuario: '', contraseña: '' });
+  const [registro, setRegistro] = useState(registroVacio);
+  const [esperandoCodigo, setEsperandoCodigo] = useState(false);
+  const [codigo, setCodigo] = useState('');
+  const [usuarioPendiente, setUsuarioPendiente] = useState('');
+  const [aviso, setAviso] = useState(null); // { tipo, texto }
+  const [enviando, setEnviando] = useState(false);
 
-}
+  // A dónde mandar a alguien con sesión: la fisio a su agenda; el paciente, a donde iba (o a reservar).
+  const destino = (rol) => (rol === 'fisio' ? '/agenda' : desde && !desde.startsWith('/agenda') ? desde : '/reservar');
 
-async function handleRegister(){
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/register`, {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({
-            nombre: nombreReg,
-            apellidos: apellidosReg,
-            nombreusuario: nombreusuarioReg,
-            contraseña: contraseñaReg,
-            telefono: telefonoReg,
-            email: emailReg
-        })
-    });
-        if (!response.ok) {
-      const errorTexto = await response.text();
-      setMensajeRegistro(errorTexto);
-      return;
-    }
-
-    setNombreusuarioRegistrado(nombreusuarioReg);
-    setEsperandoCodigo(true);
+  // Si ya hay sesión, no tiene sentido mostrar el login.
+  // (Este caso también se da justo después de entrar, así que debe ir al mismo destino.)
+  const usuario = obtenerUsuario();
+  if (usuario) {
+    return <Navigate to={destino(usuario.rol)} replace />;
   }
 
-  async function handleVerificar(){
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/verificar`, {
+  // Envuelve cada envío: pone el estado "enviando" y captura errores de conexión.
+  async function enviar(accion) {
+    setEnviando(true);
+    setAviso(null);
+    try {
+      await accion();
+    } catch {
+      setAviso({ tipo: 'error', texto: ERROR_CONEXION });
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  function entrar(data) {
+    guardarSesion(data);
+    navigate(destino(data.usuario.rol), { replace: true });
+  }
+
+  // "e.preventDefault()" evita que el formulario recargue la página al enviarse.
+  const handleLogin = (e) => {
+    e.preventDefault();
+    enviar(async () => {
+      const response = await apiFetch('/login', { method: 'POST', body: JSON.stringify(login) });
+      if (!response.ok) return setAviso({ tipo: 'error', texto: await response.text() });
+      entrar(await response.json());
+    });
+  };
+
+  const handleRegistro = (e) => {
+    e.preventDefault();
+    enviar(async () => {
+      const response = await apiFetch('/register', { method: 'POST', body: JSON.stringify(registro) });
+      if (!response.ok) return setAviso({ tipo: 'error', texto: await response.text() });
+      setUsuarioPendiente(registro.nombreusuario);
+      setEsperandoCodigo(true);
+      setAviso({ tipo: 'ok', texto: `Te hemos enviado un código a ${registro.email}.` });
+    });
+  };
+
+  const handleVerificar = (e) => {
+    e.preventDefault();
+    enviar(async () => {
+      const response = await apiFetch('/verificar', {
+        method: 'POST',
+        body: JSON.stringify({ nombreusuario: usuarioPendiente, codigo })
+      });
+      if (!response.ok) return setAviso({ tipo: 'error', texto: await response.text() });
+      entrar(await response.json());
+    });
+  };
+
+  const handleReenviar = () => enviar(async () => {
+    const response = await apiFetch('/reenviar-codigo', {
       method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        nombreusuario: nombreusuarioRegistrado,
-        codigo: codigoIngresado
-      })
+      body: JSON.stringify({ nombreusuario: usuarioPendiente })
     });
-  if (!response.ok) {
-    const errorTexto = await response.text();
-    setMensajeRegistro(errorTexto);
-  return;
-}
+    setAviso({ tipo: response.ok ? 'info' : 'error', texto: await response.text() });
+  });
 
-    const data = await response.json();
-    localStorage.setItem('usuario', JSON.stringify(data));
-    navigate('/reservar');
+  function cambiarPestaña(nueva) {
+    setPestaña(nueva);
+    setAviso(null);
   }
 
-    return (
-  <>
-   <nav className="navbar">
-  <div className="logo">
-    <span className="logo-nombre">María Montaño</span>
-    <span className="logo-sub">FISIOTERAPIA</span>
-  </div>
-  <div className="navbar-links">
-  <Link to="/" className="btn-nav">Inicio</Link>
-  <Link to="/mis-citas" className="btn-nav">Mis citas</Link>
-  <Link to="/reservar" className="btn-nav">Reservar cita</Link>
-</div>
-</nav>
+  // Actualiza un campo del objeto de estado a partir del "name" del input.
+  const campo = (setter) => (e) => setter((previo) => ({ ...previo, [e.target.name]: e.target.value }));
 
-    <section className="acceso-hero">
-      <div className="acceso-intro">
-        <h1 className="acceso-titulo">Bienvenido de nuevo</h1>
-        <p className="acceso-subtitulo">
-          Accede a tu cuenta para gestionar tus citas y seguir cuidando de tu bienestar.
-        </p>
-      </div>
+  const titulo = esperandoCodigo ? 'Verifica tu email' : pestaña === 'login' ? 'Iniciar sesión' : 'Crear cuenta';
 
-      <div className="acceso-tarjetas">
-        {!esperandoCodigo &&
-        <div className="tarjeta-acceso">
-          <div className="tarjeta-icono">👤</div>
-          <h2>Iniciar sesión</h2>
-          <label>Nombre de usuario</label>
-          <input
-            placeholder="tu_usuario"
-            value={nombreusuario}
-            onChange={(e) => setNombreusuario(e.target.value)}
-          />
-          <label>Contraseña</label>
-          <input
-            placeholder="Contraseña"
-            value={contraseña}
-            type="password"
-            onChange={(e) => setContraseña(e.target.value)}
-          />
-          <button className="btn-degradado" onClick={handleLogin}>Iniciar sesión</button>
-          <p className="mensaje-feedback">{mensaje}</p>
+  return (
+    <Pagina titulo={titulo}>
+      <section className="acceso">
+        <div className="contenedor acceso-interior">
+          {/* Tres piezas del grid: en escritorio título y teléfono a la izquierda y formulario a la derecha;
+              en móvil, título, formulario y teléfono, en ese orden. */}
+          <div className="acceso-intro">
+            <h1>Tu área de paciente</h1>
+            <p className="acceso-subtitulo">
+              {veniaDeReservar
+                ? 'Para reservar la cita, entra con tu cuenta o créate una. Solo se hace una vez.'
+                : 'Desde aquí reservas, consultas y cancelas tus citas cuando te venga bien.'}
+            </p>
+          </div>
+
+          <div className="acceso-telefono">
+            <p>¿Prefieres hacerlo por teléfono?</p>
+            <a href={CLINICA.telefonoEnlace} className="acceso-numero">
+              <Phone size={22} aria-hidden="true" /> {CLINICA.telefono}
+            </a>
+            <EstadoClinica />
+          </div>
+
+          <div className="acceso-tarjeta">
+            {esperandoCodigo ? (
+              <form onSubmit={handleVerificar} className="formulario">
+                <h2>Revisa tu correo</h2>
+                <p className="texto-suave">
+                  Escribe el código de 6 cifras que te hemos enviado. Caduca en 15 minutos.
+                  Si no lo ves, mira en la carpeta de spam.
+                </p>
+                <Aviso tipo={aviso?.tipo}>{aviso?.texto}</Aviso>
+                <div className="campo">
+                  <label htmlFor="codigo">Código de verificación</label>
+                  <input
+                    id="codigo" className="input-codigo" value={codigo}
+                    onChange={(e) => setCodigo(e.target.value.replace(/\D/g, ''))}
+                    inputMode="numeric" autoComplete="one-time-code"
+                    maxLength={6} pattern="\d{6}" required autoFocus
+                    placeholder="000000"
+                  />
+                </div>
+                <button type="submit" className="btn btn-primario btn-bloque" disabled={enviando}>
+                  {enviando ? 'Comprobando…' : 'Verificar y entrar'}
+                </button>
+                <button type="button" className="btn-texto centrado" onClick={handleReenviar} disabled={enviando}>
+                  Enviar otro código
+                </button>
+              </form>
+            ) : (
+              <>
+                <div className="pestañas" role="tablist">
+                  <button
+                    type="button" role="tab" aria-selected={pestaña === 'login'}
+                    className={pestaña === 'login' ? 'pestaña activa' : 'pestaña'}
+                    onClick={() => cambiarPestaña('login')}
+                  >
+                    Ya tengo cuenta
+                  </button>
+                  <button
+                    type="button" role="tab" aria-selected={pestaña === 'registro'}
+                    className={pestaña === 'registro' ? 'pestaña activa' : 'pestaña'}
+                    onClick={() => cambiarPestaña('registro')}
+                  >
+                    Soy nuevo
+                  </button>
+                </div>
+
+                <Aviso tipo={aviso?.tipo}>{aviso?.texto}</Aviso>
+
+                {pestaña === 'login' ? (
+                  <form onSubmit={handleLogin} className="formulario">
+                    <div className="campo">
+                      <label htmlFor="login-usuario">Nombre de usuario</label>
+                      <input id="login-usuario" name="nombreusuario" value={login.nombreusuario}
+                        onChange={campo(setLogin)} autoComplete="username" autoCapitalize="none" required />
+                    </div>
+                    <div className="campo">
+                      <label htmlFor="login-contraseña">Contraseña</label>
+                      <CampoContraseña id="login-contraseña" name="contraseña" value={login.contraseña}
+                        onChange={campo(setLogin)} autoComplete="current-password" required />
+                    </div>
+                    <button type="submit" className="btn btn-primario btn-bloque" disabled={enviando}>
+                      {enviando ? 'Entrando…' : 'Iniciar sesión'}
+                    </button>
+                    <p className="texto-suave centrado">
+                      ¿Has olvidado la contraseña? Llama a la clínica y te ayudamos a recuperarla.
+                    </p>
+                  </form>
+                ) : (
+                  <form onSubmit={handleRegistro} className="formulario">
+                    <div className="campos-fila">
+                      <div className="campo">
+                        <label htmlFor="reg-nombre">Nombre</label>
+                        <input id="reg-nombre" name="nombre" value={registro.nombre}
+                          onChange={campo(setRegistro)} autoComplete="given-name" required />
+                      </div>
+                      <div className="campo">
+                        <label htmlFor="reg-apellidos">Apellidos</label>
+                        <input id="reg-apellidos" name="apellidos" value={registro.apellidos}
+                          onChange={campo(setRegistro)} autoComplete="family-name" required />
+                      </div>
+                    </div>
+                    <div className="campos-fila">
+                      <div className="campo">
+                        <label htmlFor="reg-telefono">Teléfono</label>
+                        <input id="reg-telefono" name="telefono" type="tel" value={registro.telefono}
+                          onChange={campo(setRegistro)} autoComplete="tel" required />
+                      </div>
+                      <div className="campo">
+                        <label htmlFor="reg-email">Email</label>
+                        <input id="reg-email" name="email" type="email" value={registro.email}
+                          onChange={campo(setRegistro)} autoComplete="email" required
+                          aria-describedby="ayuda-email" />
+                        <small id="ayuda-email">Te enviaremos un código para confirmarlo.</small>
+                      </div>
+                    </div>
+                    <div className="campo">
+                      <label htmlFor="reg-usuario">Nombre de usuario</label>
+                      <input id="reg-usuario" name="nombreusuario" value={registro.nombreusuario}
+                        onChange={campo(setRegistro)} autoComplete="username" autoCapitalize="none" required
+                        aria-describedby="ayuda-usuario" />
+                      <small id="ayuda-usuario">Lo usarás para entrar. Por ejemplo: ana.garcia</small>
+                    </div>
+                    <div className="campo">
+                      <label htmlFor="reg-contraseña">Contraseña</label>
+                      <CampoContraseña id="reg-contraseña" name="contraseña" value={registro.contraseña}
+                        onChange={campo(setRegistro)} autoComplete="new-password" minLength={8} required
+                        aria-describedby="ayuda-contraseña" />
+                      <small id="ayuda-contraseña">Mínimo 8 caracteres.</small>
+                    </div>
+                    <button type="submit" className="btn btn-primario btn-bloque" disabled={enviando}>
+                      {enviando ? 'Creando cuenta…' : 'Crear cuenta'}
+                    </button>
+                  </form>
+                )}
+              </>
+            )}
+          </div>
         </div>
+      </section>
+    </Pagina>
+  );
 }
 
-                <div className="tarjeta-acceso">
-          <div className="tarjeta-icono">✚</div>
-          {!esperandoCodigo ? (
-            <>
-              <h2>Crear cuenta</h2>
-              <label>Nombre</label>
-              <input
-                placeholder="Tu nombre"
-                value={nombreReg}
-                onChange={(e) => setNombreReg(e.target.value)}
-              />
-              <label>Apellidos</label>
-              <input
-                placeholder="Tus apellidos"
-                value={apellidosReg}
-                onChange={(e) => setApellidosReg(e.target.value)}
-              />
-              <label>Nombre de usuario</label>
-              <input
-                placeholder="Elige un usuario"
-                value={nombreusuarioReg}
-                onChange={(e) => setNombreusuarioReg(e.target.value)}
-              />
-              <label>Contraseña</label>
-              <input
-                placeholder="Contraseña"
-                value={contraseñaReg}
-                type="password"
-                onChange={(e) => setContraseñaReg(e.target.value)}
-              />
-              <label>Teléfono</label>
-              <input
-                placeholder="Tu teléfono"
-                value={telefonoReg}
-                onChange={(e) => setTelefonoReg(e.target.value)}
-              />
-              <label>Email</label>
-              <input
-                placeholder="tu@email.com"
-                value={emailReg}
-                onChange={(e) => setEmailReg(e.target.value)}
-              />
-              <button className="btn-degradado" onClick={handleRegister}>Crear cuenta</button>
-            </>
-          ) : (
-            <>
-              <h2>Verifica tu email</h2>
-              <p>Te hemos enviado un código a tu correo. Introdúcelo aquí:</p>
-              <input
-                placeholder="Código de 6 dígitos"
-                value={codigoIngresado}
-                onChange={(e) => setCodigoIngresado(e.target.value)}
-              />
-              <button className="btn-degradado" onClick={handleVerificar}>Verificar</button>
-            </>
-          )}
-          <p className="mensaje-feedback">{mensajeRegistro}</p>
-        </div>
-      </div>
-
-      <div className="acceso-beneficios">
-        <p className="beneficios-quote">"Tu bienestar es nuestra prioridad"</p>
-        <div className="beneficio-item">
-          <h3>Gestiona tus citas</h3>
-          <p>Reserva, modifica o cancela tus citas fácilmente.</p>
-        </div>
-        <div className="beneficio-item">
-          <h3>Cuidado continuo</h3>
-          <p>Accede a tu historial de citas cuando quieras.</p>
-        </div>
-      </div>
-    </section>
-    <Footer />
-  </>
-
-    )    
-}
-export default Acceso
+export default Acceso;

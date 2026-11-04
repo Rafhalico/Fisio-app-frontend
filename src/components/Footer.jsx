@@ -1,37 +1,52 @@
+import { MapPin, Phone, Mail, AtSign, Clock } from 'lucide-react';
+import { CLINICA, HORARIO } from '../datos/clinica';
+
 function Footer() {
   return (
     <footer className="footer">
-      <div className="footer-columna">
-        <div className="logo">
-          <span className="logo-nombre-footer">María Montaño</span>
-          <span className="logo-sub-footer">FISIOTERAPIA</span>
+      <div className="contenedor footer-columnas">
+        <div className="footer-columna">
+          <span className="logo-nombre">María Montaño</span>
+          <span className="logo-sub">Fisioterapia</span>
+          <p className="footer-lema">Cuidamos de ti, mejoramos tu vida.</p>
         </div>
-        <p>Cuidamos de ti, mejoramos tu vida.</p>
-      </div>
 
-      <div className="footer-columna">
-        <h4>Ubicación</h4>
-          <a href="https://www.google.com/maps/place/Fisioterapia+Mar%C3%ADa+Monta%C3%B1o/@37.2515137,-4.9159627,19z/data=!3m1!4b1!4m6!3m5!1s0xd6d5784606c3e25:0x65582221a836c2ba!8m2!3d37.2515137!4d-4.9153176!16s%2Fg%2F11s854l6b2?entry=ttu&g_ep=EgoyMDI2MDgzMC4wIKXMDSoASAFQAw%3D%3D" target="_blank">
-        <p>C. La Cruz, 26, bajo</p>
-        <p>41565 Gilena, Sevilla</p>
-        </a>
-      </div>
+        <div className="footer-columna">
+          <h2>Dónde estamos</h2>
+          <a href={CLINICA.mapa} target="_blank" rel="noopener noreferrer" className="footer-dato">
+            <MapPin size={16} aria-hidden="true" />
+            <span>{CLINICA.direccion}<br />{CLINICA.localidad}</span>
+          </a>
+        </div>
 
-      <div className="footer-columna">
-        <h4>Contacto</h4>
-        <p><a href="tel:626446019">626 44 60 19</a></p>
-        <p><a href="mailto:fisioterapiamariamongarcia@gmail.com">fisioterapiamariamongarcia@gmail.com</a></p>
-      </div>
+        <div className="footer-columna">
+          <h2>Contacto</h2>
+          <a href={CLINICA.telefonoEnlace} className="footer-dato">
+            <Phone size={16} aria-hidden="true" /> {CLINICA.telefono}
+          </a>
+          <a href={`mailto:${CLINICA.email}`} className="footer-dato footer-email">
+            <Mail size={16} aria-hidden="true" /> <span>{CLINICA.email.replace('@', '​@')}</span>
+          </a>
+          <a href={`https://instagram.com/${CLINICA.instagram}`} target="_blank" rel="noopener noreferrer" className="footer-dato">
+            <AtSign size={16} aria-hidden="true" /> Instagram: {CLINICA.instagram}
+          </a>
+        </div>
 
-      <div className="footer-columna">
-        <h4>Síguenos</h4>
-        <a href="https://instagram.com/fisioterapia_mmg" target="_blank" className="footer-instagram">
-          @fisioterapia_mmg
-        </a>
+        <div className="footer-columna">
+          <h2>Horario</h2>
+          <ul className="footer-horario">
+            {HORARIO.map(({ dia, franjas }) => (
+              <li key={dia}>
+                <Clock size={14} aria-hidden="true" />
+                <span><strong>{dia}:</strong> {franjas.length ? franjas.join(' y ') : 'Cerrado'}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
 
       <div className="footer-copyright">
-        <p>© 2026 María Montaño Fisioterapia. Todos los derechos reservados.</p>
+        <p>© {new Date().getFullYear()} {CLINICA.nombre}. Todos los derechos reservados.</p>
       </div>
     </footer>
   );
