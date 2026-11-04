@@ -3,19 +3,14 @@ import {Link} from 'react-router-dom';
 import {useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
 import Footer from '../components/Footer';
+import { apiFetch } from '../api';
+import { cerrarSesion } from '../sesion';
 
 function MisCitas() {
     const [citas, setCitas] = useState([]);
     const [pestaña, setPestaña] = useState('proximas');
-    const usuarioGuardado = localStorage.getItem('usuario');
-    const usuario = JSON.parse(usuarioGuardado);
+    const [mensaje, setMensaje] = useState('');
     const navigate= useNavigate();
-
-useEffect(() => {
-  if(!usuario){
-    navigate('/acceso');
-  }
-}, []);
 
     function citasFiltradas() {
   const ahora = new Date();
@@ -29,27 +24,24 @@ useEffect(() => {
   return citas.filter(c => c.estado === 'reservada' && new Date(c.datetime) < ahora);
 }
 
-    useEffect(() => {
-        cargarCitas();
-    }, []);
+    // Cada vez que cambia "recarga" se vuelven a pedir las citas (p. ej. tras cancelar una).
+    const [recarga, setRecarga] = useState(0);
 
-    async function cargarCitas() {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/appointments/paciente/${usuario.id}`);
-        const data = await response.json();
-        setCitas(data);
-    }
+    useEffect(() => {
+        // "activo" evita actualizar el estado si la página se cierra antes de que llegue la respuesta.
+        let activo = true;
+        apiFetch('/appointments/mias')
+            .then((response) => (response.ok ? response.json() : []))
+            .then((data) => { if (activo) setCitas(data); });
+        return () => { activo = false; };
+    }, [recarga]);
 
     async function handleCancelar(idCita){
-     
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/appointments/${idCita}`, {
-        method: 'PUT',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ quienCancela: 'paciente' })
-            
-         });
-         const data = await response.text();
-         console.log(data);
-         cargarCitas();
+        // Ya no se manda quienCancela: el servidor lo deduce del rol del token.
+        const response = await apiFetch(`/appointments/${idCita}`, { method: 'PUT' });
+        // Antes el mensaje solo iba a la consola; ahora se muestra (p. ej. la regla de 24 h).
+        setMensaje(await response.text());
+        setRecarga((n) => n + 1);
     }
 
     return (
@@ -66,7 +58,7 @@ useEffect(() => {
     <button
       className="btn-nav"
       onClick={() => {
-        localStorage.removeItem('usuario');
+        cerrarSesion();
         navigate('/');
       }}
     >
@@ -112,6 +104,7 @@ useEffect(() => {
         </button>
       </div>
 
+      <p className="mensaje-feedback">{mensaje}</p>
       <div className="miscitas-lista">
         {citasFiltradas().length === 0 &&
           <p className="miscitas-vacio">No hay citas en esta categoría.</p>

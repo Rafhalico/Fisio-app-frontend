@@ -2,6 +2,8 @@ import {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 import {Link} from 'react-router-dom';
 import Footer from '../components/Footer';
+import { apiFetch } from '../api';
+import { guardarSesion } from '../sesion';
 
 function Acceso() {
     const [nombreusuario, setNombreusuario] = useState('');
@@ -20,9 +22,8 @@ function Acceso() {
     const [nombreusuarioRegistrado, setNombreusuarioRegistrado] = useState('');
 
 async function handleLogin(){
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/login`, {
+    const response = await apiFetch('/login', {
         method: 'POST',
-        headers: {'Content-Type':'application/json'},
         body: JSON.stringify({nombreusuario, contraseña})
     });
     if (!response.ok) {
@@ -30,12 +31,11 @@ async function handleLogin(){
         setMensaje(errorTexto);
         return;
     }
-        const data = await response.json();
-        localStorage.setItem('usuario', JSON.stringify(data));
-        setMensaje('Inicio de sesión exitoso');
-        
-      
-    if (data.rol === 'fisio') {
+    // El servidor devuelve { token, usuario }: guardamos ambos.
+    const data = await response.json();
+    guardarSesion(data);
+
+    if (data.usuario.rol === 'fisio') {
       navigate('/agenda');
     
     } else {
@@ -45,9 +45,8 @@ async function handleLogin(){
 }
 
 async function handleRegister(){
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/register`, {
+    const response = await apiFetch('/register', {
         method: 'POST',
-        headers: {'Content-Type':'application/json'},
         body: JSON.stringify({
             nombre: nombreReg,
             apellidos: apellidosReg,
@@ -64,13 +63,21 @@ async function handleRegister(){
     }
 
     setNombreusuarioRegistrado(nombreusuarioReg);
+    setMensajeRegistro('');
     setEsperandoCodigo(true);
   }
 
-  async function handleVerificar(){
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/verificar`, {
+  async function handleReenviarCodigo(){
+    const response = await apiFetch('/reenviar-codigo', {
       method: 'POST',
-      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ nombreusuario: nombreusuarioRegistrado })
+    });
+    setMensajeRegistro(await response.text());
+  }
+
+  async function handleVerificar(){
+    const response = await apiFetch('/verificar', {
+      method: 'POST',
       body: JSON.stringify({
         nombreusuario: nombreusuarioRegistrado,
         codigo: codigoIngresado
@@ -83,7 +90,7 @@ async function handleRegister(){
 }
 
     const data = await response.json();
-    localStorage.setItem('usuario', JSON.stringify(data));
+    guardarSesion(data);
     navigate('/reservar');
   }
 
@@ -186,6 +193,7 @@ async function handleRegister(){
                 onChange={(e) => setCodigoIngresado(e.target.value)}
               />
               <button className="btn-degradado" onClick={handleVerificar}>Verificar</button>
+              <button className="btn-nav" onClick={handleReenviarCodigo}>Enviar otro código</button>
             </>
           )}
           <p className="mensaje-feedback">{mensajeRegistro}</p>

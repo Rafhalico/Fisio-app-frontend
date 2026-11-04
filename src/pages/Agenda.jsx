@@ -1,28 +1,25 @@
 import {useState} from 'react'
-import {Link} from 'react-router-dom';
 import Calendario from '../components/Calendario';
-import {useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
 import Footer from '../components/Footer';
+import { apiFetch } from '../api';
+import { obtenerUsuario, cerrarSesion } from '../sesion';
 
 function Agenda() {
     const [fecha, setFecha] = useState ('');
     const [citas, setCitas] = useState([]);
-    const usuarioGuardado = localStorage.getItem('usuario');
-    const usuario = JSON.parse(usuarioGuardado);
+    // RutaProtegida ya ha comprobado que hay sesión de fisio antes de llegar aquí.
+    const usuario = obtenerUsuario();
     const navigate= useNavigate();
 
-useEffect(() => {
-  if(!usuario){
-    navigate('/acceso');
-  }
-}, []);
-
     async function cargarAgenda(fechaElegida){
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/appointments?fecha=${fechaElegida}&idFisio=${usuario.id}`);
-        const data = await response.json();
-        setCitas(data);
-
+        // Ya no mandamos idFisio: el servidor sabe quién eres por el token.
+        const response = await apiFetch(`/appointments?fecha=${fechaElegida}`);
+        if (!response.ok) {
+            setCitas([]);
+            return;
+        }
+        setCitas(await response.json());
     }
     return (
   <>
@@ -36,7 +33,7 @@ useEffect(() => {
         <button
          className="btn-nav"
         onClick={() => {
-        localStorage.removeItem('usuario');
+        cerrarSesion();
          navigate('/');
     }}
     >   

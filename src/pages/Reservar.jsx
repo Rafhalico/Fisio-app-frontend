@@ -1,9 +1,10 @@
 import {useState} from 'react'
 import {Link} from 'react-router-dom';
 import Calendario from '../components/Calendario';
-import {useEffect} from 'react';
 import {useNavigate} from 'react-router-dom';
 import Footer from '../components/Footer';
+import { apiFetch } from '../api';
+import { cerrarSesion } from '../sesion';
 
 function Reservar() {
     const [fecha, setFecha] = useState ('');
@@ -11,25 +12,10 @@ function Reservar() {
     const [motivo, setMotivo] = useState('');
     const [mensajeReserva, setMensajeReserva] = useState('');
     const [horaSeleccionada, setHoraSeleccionada] = useState('');
-    const usuarioGuardado = localStorage.getItem('usuario');
-    const usuario = JSON.parse(usuarioGuardado);
     const navigate= useNavigate();
-    
 
-useEffect(() => {
-  if(!usuario){
-    navigate('/acceso');
-  }
-}, []);
-
-function handleFechaChange(e) {
-  const nuevaFecha = e.target.value;
-  setFecha(nuevaFecha);
-  cargarDisponibilidad(nuevaFecha);
-}
-  
 async function cargarDisponibilidad(fechaElegida) {
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/appointments/available?fecha=${fechaElegida}`);
+  const response = await apiFetch(`/appointments/available?fecha=${fechaElegida}`);
 
   if (!response.ok) {
     const errorTexto = await response.text();
@@ -43,11 +29,10 @@ async function cargarDisponibilidad(fechaElegida) {
 
 async function handleReservar() {
     const datetime = `${fecha} ${horaSeleccionada}`;
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/appointments`, {
+    // Ya no mandamos idPaciente: el servidor lo saca del token.
+    const response = await apiFetch('/appointments', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
-            idPaciente: usuario.id,
             datetime: datetime,
             motivo: motivo
         })
@@ -70,7 +55,7 @@ async function handleReservar() {
     <button
       className="btn-nav"
       onClick={() => {
-        localStorage.removeItem('usuario');
+        cerrarSesion();
         navigate('/');
       }}
     >
