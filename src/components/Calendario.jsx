@@ -13,7 +13,8 @@ const nombresMeses = [
 // - onSeleccionarFecha(fecha)
 // - esDiaDisponible(fecha): opcional; si devuelve false, el día sale desactivado
 // - permitirPasado: si es false (por defecto) no deja ir a meses ni días pasados
-function Calendario({ fechaSeleccionada, onSeleccionarFecha, esDiaDisponible, permitirPasado = false }) {
+// - diasMarcados: opcional, Set de fechas que se pintan como "cerradas" (sin desactivarlas)
+function Calendario({ fechaSeleccionada, onSeleccionarFecha, esDiaDisponible, permitirPasado = false, diasMarcados }) {
   const [mesActual, setMesActual] = useState(() => {
     const base = fechaSeleccionada ? aDate(fechaSeleccionada) : new Date();
     return new Date(base.getFullYear(), base.getMonth(), 1);
@@ -71,6 +72,8 @@ function Calendario({ fechaSeleccionada, onSeleccionarFecha, esDiaDisponible, pe
           const clases = ['calendario-dia'];
           if (fecha === fechaSeleccionada) clases.push('activo');
           if (fecha === hoy) clases.push('hoy');
+          const marcado = diasMarcados?.has(fecha);
+          if (marcado) clases.push('marcado');
 
           return (
             <button
@@ -80,7 +83,7 @@ function Calendario({ fechaSeleccionada, onSeleccionarFecha, esDiaDisponible, pe
               className={clases.join(' ')}
               disabled={!disponible}
               aria-pressed={fecha === fechaSeleccionada}
-              aria-label={formatearDia(fecha) + (fecha === hoy ? ' (hoy)' : '')}
+              aria-label={formatearDia(fecha) + (fecha === hoy ? ' (hoy)' : '') + (marcado ? ' (cerrado)' : '')}
               onClick={() => onSeleccionarFecha(fecha)}
             >
               {dia}

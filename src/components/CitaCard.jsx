@@ -8,16 +8,20 @@ import { partesCita, capitalizar } from '../utils/fechas';
 // - onCancelar: si se pasa, muestra el botón de cancelar con confirmación
 // - vistaDia: en la agenda el día ya sale arriba, así que el bloque muestra la hora
 //   y la línea principal pasa a ser "titulo" (el nombre del paciente)
-function CitaCard({ cita, detalle, estado, onCancelar, vistaDia = false, titulo }) {
+// - pedirMotivo: al cancelar, muestra un campo para escribir el motivo (lo usa la fisio;
+//   el motivo le llega al paciente por correo). onCancelar recibe (id, motivo).
+function CitaCard({ cita, detalle, estado, onCancelar, vistaDia = false, titulo, pedirMotivo = false }) {
   const [confirmando, setConfirmando] = useState(false);
   const [cancelando, setCancelando] = useState(false);
+  const [motivo, setMotivo] = useState('');
   const { dia, hora, numero, mes } = partesCita(cita.datetime);
 
   async function confirmar() {
     setCancelando(true);
-    await onCancelar(cita.id);
+    await onCancelar(cita.id, motivo.trim());
     setCancelando(false);
     setConfirmando(false);
+    setMotivo('');
   }
 
   return (
@@ -53,8 +57,19 @@ function CitaCard({ cita, detalle, estado, onCancelar, vistaDia = false, titulo 
           </button>
         )}
         {onCancelar && confirmando && (
-          <div className="confirmar-cancelacion" role="group" aria-label="Confirmar cancelación">
+          <div className={pedirMotivo ? 'confirmar-cancelacion con-motivo' : 'confirmar-cancelacion'} role="group" aria-label="Confirmar cancelación">
             <span>¿Cancelar esta cita?</span>
+            {pedirMotivo && (
+              <input
+                className="input-motivo"
+                value={motivo}
+                onChange={(e) => setMotivo(e.target.value)}
+                maxLength={200}
+                placeholder="Motivo (le llegará al paciente)"
+                aria-label="Motivo de la cancelación"
+                autoFocus
+              />
+            )}
             <button type="button" className="btn btn-peligro btn-pequeno" onClick={confirmar} disabled={cancelando}>
               {cancelando ? 'Cancelando…' : 'Sí, cancelar'}
             </button>

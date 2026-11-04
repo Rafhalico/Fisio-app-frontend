@@ -108,6 +108,11 @@ function MisCitas() {
                   cita={cita}
                   estado={pestaña === 'canceladas' ? 'Cancelada' : pestaña === 'historial' ? 'Realizada' : null}
                   onCancelar={pestaña === 'proximas' ? handleCancelar : null}
+                  detalle={cita.canceladapor === 'fisio' && (
+                    <p className="cita-nota">
+                      Cancelada por la clínica{cita.motivocancelacion ? `: ${cita.motivocancelacion}` : '.'}
+                    </p>
+                  )}
                 />
               ))}
             </div>
