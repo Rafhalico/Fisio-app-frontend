@@ -44,3 +44,24 @@ export function partesCita(datetime) {
 export function capitalizar(texto) {
   return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
+
+// "2026-11-10" + 3 -> "2026-11-13"
+export function sumarDias(fecha, dias) {
+  const d = aDate(fecha);
+  d.setDate(d.getDate() + dias);
+  return aTextoFecha(d);
+}
+
+// Todas las fechas de un rango, ambas incluidas: ("2026-11-10", "2026-11-12") -> [10, 11, 12]
+export function diasDelRango(inicio, fin) {
+  const dias = [];
+  for (let dia = inicio; dia <= fin && dias.length < 400; dia = sumarDias(dia, 1)) dias.push(dia);
+  return dias;
+}
+
+// Texto de un rango: "martes, 10 de noviembre" o "del 10 de noviembre al 13 de noviembre"
+export function formatearRango(inicio, fin) {
+  if (inicio === fin) return formatearDia(inicio);
+  const corto = (f) => aDate(f).toLocaleDateString('es-ES', { day: 'numeric', month: 'long' });
+  return `del ${corto(inicio)} al ${corto(fin)}`;
+}

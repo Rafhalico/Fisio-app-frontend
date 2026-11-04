@@ -6,7 +6,7 @@ import Calendario from '../components/Calendario';
 import Aviso from '../components/Aviso';
 import { apiFetch, ERROR_CONEXION } from '../api';
 import { DIAS_ABIERTO } from '../datos/clinica';
-import { aDate, hoyTexto, formatearDia, capitalizar } from '../utils/fechas';
+import { aDate, hoyTexto, formatearDia, capitalizar, sumarDias } from '../utils/fechas';
 
 // El calendario solo deja elegir los días que abre la clínica.
 const esDiaDeApertura = (fecha) => DIAS_ABIERTO.includes(aDate(fecha).getDay());
@@ -33,6 +33,18 @@ function Reservar() {
   const [aviso, setAviso] = useState('');
   const [reservada, setReservada] = useState(null); // { fecha, hora } tras reservar
   const [recarga, setRecarga] = useState(0);
+  // Días que la clínica ha cerrado (vacaciones, festivos...) en los próximos meses.
+  const [diasCerrados, setDiasCerrados] = useState(() => new Set());
+
+  useEffect(() => {
+    const hoy = hoyTexto();
+    apiFetch(`/dias-cerrados?desde=${hoy}&hasta=${sumarDias(hoy, 180)}`)
+      .then((response) => (response.ok ? response.json() : []))
+      .then((dias) => setDiasCerrados(new Set(dias)))
+      .catch(() => {}); // si falla, el servidor seguirá rechazando esos días al reservar
+  }, []);
+
+  const esDiaReservable = (dia) => esDiaDeApertura(dia) && !diasCerrados.has(dia);
 
   // Al elegir día se reinicia la hora. Antes se quedaba la del día anterior
   // y se podía reservar una hora que no estaba libre en el día nuevo.
@@ -137,8 +149,8 @@ function Reservar() {
         <div className="tarjeta panel-dos-columnas">
           <div>
             <h2 className="paso-titulo"><span>1</span> Elige el día</h2>
-            <Calendario fechaSeleccionada={fecha} onSeleccionarFecha={elegirFecha} esDiaDisponible={esDiaDeApertura} />
-            <p className="nota-calendario">Abrimos de lunes a viernes.</p>
+            <Calendario fechaSeleccionada={fecha} onSeleccionarFecha={elegirFecha} esDiaDisponible={esDiaReservable} />
+            <p className="nota-calendario">Abrimos de lunes a viernes. Los días en gris no tienen citas disponibles.</p>
           </div>
 
           <div>

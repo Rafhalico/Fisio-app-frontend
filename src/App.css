@@ -1577,6 +1577,137 @@ textarea::placeholder {
 }
 
 /* =========================================================
+   DÍAS CERRADOS Y CANCELAR CON MOTIVO
+   ========================================================= */
+.calendario-dia.marcado {
+  background-color: var(--gris-claro);
+  color: var(--texto-suave);
+  text-decoration: line-through;
+  text-decoration-color: rgba(166, 38, 57, 0.5);
+}
+
+.calendario-dia.marcado.activo {
+  background: var(--texto-suave);
+  color: var(--blanco);
+}
+
+.banda-cerrado {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: var(--radio-pequeno);
+  background-color: var(--gris-claro);
+  color: var(--texto);
+  font-size: 0.9rem;
+}
+
+.banda-cerrado svg {
+  flex-shrink: 0;
+  color: var(--vino);
+}
+
+.confirmar-cancelacion.con-motivo {
+  justify-content: flex-end;
+  max-width: 340px;
+}
+
+.confirmar-cancelacion.con-motivo span {
+  width: 100%;
+  text-align: right;
+}
+
+.input-motivo {
+  padding: 0.5rem 0.8rem;
+  font-size: 0.85rem;
+}
+
+.cita-nota {
+  margin-top: 0.3rem;
+  font-size: 0.85rem;
+  color: var(--vino-oscuro);
+}
+
+.dias-cerrados-seccion {
+  margin-top: -1.5rem;
+  margin-bottom: 4rem;
+}
+
+.citas-afectadas {
+  padding: 1rem 1.1rem;
+  margin-bottom: 1.4rem;
+  border-left: 3px solid var(--coral);
+  border-radius: 0 var(--radio-pequeno) var(--radio-pequeno) 0;
+  background-color: var(--crema-2);
+  font-size: 0.9rem;
+}
+
+.citas-afectadas ul {
+  list-style: none;
+  margin-top: 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.citas-afectadas li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 1rem;
+}
+
+.citas-afectadas li a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--vino);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.subtitulo-lista {
+  font-size: 1.2rem;
+  color: var(--texto);
+  margin-bottom: 0.8rem;
+}
+
+.lista-cierres {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.lista-cierres li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.6rem 1rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--borde);
+}
+
+.lista-cierres li > div:first-child {
+  display: flex;
+  flex-direction: column;
+}
+
+.cierre-fechas {
+  font-weight: 500;
+}
+
+.cierre-motivo {
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+}
+
+input[type="date"] {
+  min-height: 2.9rem;
+}
+
+/* =========================================================
    ADAPTACIÓN A TABLET Y MÓVIL
    ========================================================= */
 @media (max-width: 980px) {
