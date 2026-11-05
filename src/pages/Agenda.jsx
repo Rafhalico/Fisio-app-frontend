@@ -97,7 +97,7 @@ function Agenda() {
   const numero = citas.length;
 
   return (
-    <Pagina titulo="Agenda">
+    <Pagina titulo="Agenda" noIndexar>
       <CabeceraPagina
         titulo="Agenda de la clínica"
         subtitulo={`Hola, ${usuario.nombre}. Aquí veis los dos todas las citas; repartidlas con «Asignar a».`}

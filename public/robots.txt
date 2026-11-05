@@ -1,0 +1,8 @@
+# Las páginas privadas (agenda, citas, perfil) no deben salir en Google
+User-agent: *
+Disallow: /agenda
+Disallow: /mis-citas
+Disallow: /perfil
+Disallow: /restablecer
+
+Sitemap: https://www.mariamontanofisioterapia.es/sitemap.xml

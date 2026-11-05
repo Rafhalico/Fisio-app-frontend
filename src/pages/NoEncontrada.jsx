@@ -3,7 +3,7 @@ import Pagina from '../components/Pagina';
 
 function NoEncontrada() {
   return (
-    <Pagina titulo="Página no encontrada">
+    <Pagina titulo="Página no encontrada" noIndexar>
       <section className="contenedor no-encontrada">
         <p className="no-encontrada-codigo" aria-hidden="true">404</p>
         <h1>Esta página no existe</h1>

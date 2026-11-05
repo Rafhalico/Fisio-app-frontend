@@ -49,7 +49,7 @@ function Restablecer() {
   const destino = usuario?.rol === 'fisio' ? '/agenda' : '/reservar';
 
   return (
-    <Pagina titulo="Nueva contraseña">
+    <Pagina titulo="Nueva contraseña" noIndexar>
       <section className="acceso">
         <div className="contenedor restablecer">
           <div className="acceso-tarjeta">
