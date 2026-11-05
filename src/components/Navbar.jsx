@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { Menu, X, LogOut } from 'lucide-react';
-import { obtenerUsuario, cerrarSesion } from '../sesion';
+import { Menu, X, LogOut, ShieldCheck } from 'lucide-react';
+import { apiFetch } from '../api';
+import { obtenerUsuario, cerrarSesion, guardarSesion } from '../sesion';
 
 // Barra de navegación única para toda la web.
 // Cambia según quién esté mirando: visitante, paciente o fisio.
@@ -12,6 +13,23 @@ function Navbar() {
 
   const cerrarMenu = () => setAbierto(false);
   const claseEnlace = ({ isActive }) => (isActive ? 'nav-enlace activo' : 'nav-enlace');
+
+  // Administrador: ver la web como fisio o como paciente (el servidor da una sesión nueva con ese modo)
+  const [cambiando, setCambiando] = useState(false);
+  async function cambiarModo(modo) {
+    if (modo === usuario.rol || cambiando) return;
+    setCambiando(true);
+    try {
+      const response = await apiFetch('/modo', { method: 'POST', body: JSON.stringify({ modo }) });
+      if (response.ok) {
+        guardarSesion(await response.json());
+        cerrarMenu();
+        navigate(modo === 'fisio' ? '/agenda' : '/reservar');
+      }
+    } finally {
+      setCambiando(false);
+    }
+  }
 
   function salir() {
     cerrarSesion();
@@ -49,6 +67,21 @@ function Navbar() {
               {usuario && <NavLink to="/perfil" className={claseEnlace}>Mi perfil</NavLink>}
               {!usuario && <NavLink to="/acceso" className={claseEnlace}>Acceder</NavLink>}
               <NavLink to="/reservar" className="btn btn-primario btn-pequeno">Reservar cita</NavLink>
+            </>
+          )}
+
+          {usuario?.admin && (
+            <>
+              <NavLink to="/admin" className={claseEnlace}><ShieldCheck size={16} aria-hidden="true" /> Administración</NavLink>
+              <div className="selector-modo" role="group" aria-label="Ver la web como" onClick={(e) => e.stopPropagation()}>
+                <span>Ver como</span>
+                {[['fisio', 'Fisio'], ['paciente', 'Paciente']].map(([modo, texto]) => (
+                  <button key={modo} type="button" aria-pressed={usuario.rol === modo} disabled={cambiando}
+                    className={usuario.rol === modo ? 'activo' : ''} onClick={() => cambiarModo(modo)}>
+                    {texto}
+                  </button>
+                ))}
+              </div>
             </>
           )}
 

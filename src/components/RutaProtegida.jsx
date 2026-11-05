@@ -5,13 +5,18 @@ import { obtenerUsuario } from '../sesion';
 // Comprueba ANTES de pintar la página, así nunca se renderiza con usuario null
 // (que era lo que dejaba la pantalla en blanco).
 // Es solo comodidad para el usuario: la seguridad real la pone el backend.
-function RutaProtegida({ rol, children }) {
+// admin: solo para el administrador (la página de Administración).
+function RutaProtegida({ rol, admin = false, children }) {
   const usuario = obtenerUsuario();
   const location = useLocation();
 
   if (!usuario) {
     // Guardamos a dónde quería ir (con su ?fecha=...&hora=...) para volver tras el login.
     return <Navigate to="/acceso" replace state={{ desde: location.pathname + location.search }} />;
+  }
+
+  if (admin && !usuario.admin) {
+    return <Navigate to={usuario.rol === 'fisio' ? '/agenda' : '/reservar'} replace />;
   }
 
   if (rol && usuario.rol !== rol) {
