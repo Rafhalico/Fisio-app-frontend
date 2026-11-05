@@ -1730,29 +1730,118 @@ input[type="date"] {
 }
 
 /* =========================================================
-   VARIAS FISIOS
+   AGENDA COMPARTIDA Y CIERRES
    ========================================================= */
-.cita-con {
-  font-size: 0.85rem;
+.hora-estado {
+  font-size: 0.7rem;
+  font-weight: 400;
+}
+
+.hora:not(:disabled) .hora-estado {
+  color: var(--verde);
+}
+
+.hora.ultimo:not(:disabled) .hora-estado {
+  color: var(--coral-texto);
+}
+
+.hora.seleccionada .hora-estado {
+  color: var(--blanco);
+}
+
+.huecos-dia-agenda {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1.1rem;
+}
+
+.huecos-dia-agenda li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 3.6rem;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  line-height: 1.25;
+}
+
+.huecos-dia-agenda small {
   color: var(--texto-suave);
 }
 
+.huecos-dia-agenda li.medio {
+  background-color: var(--crema-2);
+  border-color: #EBCDB6;
+}
+
+.huecos-dia-agenda li.lleno {
+  background-color: var(--rojo-fondo);
+  border-color: #F0C2C6;
+}
+
+.huecos-dia-agenda li.lleno small {
+  color: var(--vino-oscuro);
+  font-weight: 600;
+}
+
+.btn-atender {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.7rem;
+  border: 1.5px dashed var(--vino);
+  border-radius: 999px;
+  background-color: var(--blanco);
+  color: var(--vino);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-atender:hover {
+  background-color: var(--crema-2);
+  border-style: solid;
+}
+
 .cita-fisio {
-  padding: 0.05rem 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.1rem 0.7rem;
   border-radius: 999px;
   background-color: var(--gris-claro);
   color: var(--texto-suave);
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 500;
 }
 
 .cita-fisio.mia {
-  background-color: var(--crema-2);
-  color: var(--vino);
+  background-color: var(--verde-fondo);
+  color: var(--verde);
 }
 
-.agenda-vista {
-  max-width: 320px;
+.cita-fisio .btn-texto {
+  padding: 0;
+  font-size: 0.78rem;
+  color: var(--verde);
+  text-decoration-color: rgba(46, 125, 79, 0.4);
+}
+
+.opciones-cierre {
+  border: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.opciones-cierre legend {
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 0.4rem;
 }
 
 .casilla {
@@ -1760,9 +1849,15 @@ input[type="date"] {
   align-items: flex-start;
   gap: 0.7rem;
   padding: 0.8rem 1rem;
-  border: 1px solid var(--borde);
+  border: 1.5px solid var(--borde);
   border-radius: var(--radio-pequeno);
   cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.casilla.activa {
+  border-color: var(--vino);
+  background-color: var(--crema);
 }
 
 .casilla input {
@@ -1784,11 +1879,20 @@ input[type="date"] {
   color: var(--texto-suave);
 }
 
-.etiqueta-clinica {
+.etiqueta-cerrado,
+.etiqueta-un-fisio {
   margin-left: 0.5rem;
+  vertical-align: 0.1em;
+}
+
+.etiqueta-cerrado {
   background-color: var(--rojo-fondo);
   color: var(--vino-oscuro);
-  vertical-align: 0.1em;
+}
+
+.etiqueta-un-fisio {
+  background-color: var(--crema-2);
+  color: var(--coral-texto);
 }
 
 /* =========================================================

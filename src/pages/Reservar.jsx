@@ -129,7 +129,6 @@ function Reservar() {
               {capitalizar(formatearDia(reservada.fecha))} a las {reservada.hora}
             </p>
             <p className="texto-suave">
-              En «Mis citas» verás con qué fisioterapeuta es.
               Si no puedes venir, cancélala desde «Mis citas» con al menos 24 horas de antelación.
             </p>
             <div className="botones-fila">
@@ -170,13 +169,16 @@ function Reservar() {
                     <button
                       type="button"
                       key={hora}
-                      className={hora === horaSeleccionada ? 'hora seleccionada' : 'hora'}
+                      className={['hora', hora === horaSeleccionada && 'seleccionada', huecosLibres === 1 && 'ultimo'].filter(Boolean).join(' ')}
                       disabled={huecosLibres === 0}
                       aria-pressed={hora === horaSeleccionada}
                       onClick={() => setHoraSeleccionada(hora)}
                     >
                       <Clock size={14} aria-hidden="true" /> {hora}
-                      {huecosLibres === 0 && <span className="hora-estado">Completo</span>}
+                      {/* Los pacientes ven cuántas citas quedan a cada hora */}
+                      <span className="hora-estado">
+                        {huecosLibres === 0 ? 'Completo' : huecosLibres === 1 ? '1 libre' : `${huecosLibres} libres`}
+                      </span>
                     </button>
                   ))}
                 </div>
