@@ -6,6 +6,7 @@ import Reservar from './pages/Reservar';
 import Agenda from './pages/Agenda';
 import NoEncontrada from './pages/NoEncontrada';
 import Restablecer from './pages/Restablecer';
+import Perfil from './pages/Perfil';
 import RutaProtegida from './components/RutaProtegida';
 import ScrollArriba from './components/ScrollArriba';
 import AvisoServidor from './components/AvisoServidor';
@@ -21,6 +22,7 @@ function App() {
         <Route path="/restablecer" element={<Restablecer />} />
         <Route path="/reservar" element={<RutaProtegida rol="paciente"><Reservar/></RutaProtegida>} />
         <Route path="/mis-citas" element={<RutaProtegida rol="paciente"><MisCitas/></RutaProtegida>} />
+        <Route path="/perfil" element={<RutaProtegida><Perfil/></RutaProtegida>} />
         <Route path="/agenda" element={<RutaProtegida rol="fisio"><Agenda/></RutaProtegida>} />
         <Route path="*" element={<NoEncontrada />} />
       </Routes>

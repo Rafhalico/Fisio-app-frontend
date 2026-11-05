@@ -38,11 +38,15 @@ function Navbar() {
 
         <nav className={abierto ? 'navbar-enlaces abierto' : 'navbar-enlaces'} onClick={cerrarMenu}>
           {usuario?.rol === 'fisio' ? (
-            <NavLink to="/agenda" className={claseEnlace}>Mi agenda</NavLink>
+            <>
+              <NavLink to="/agenda" className={claseEnlace}>Mi agenda</NavLink>
+              <NavLink to="/perfil" className={claseEnlace}>Mi perfil</NavLink>
+            </>
           ) : (
             <>
               <NavLink to="/" end className={claseEnlace}>Inicio</NavLink>
               {usuario && <NavLink to="/mis-citas" className={claseEnlace}>Mis citas</NavLink>}
+              {usuario && <NavLink to="/perfil" className={claseEnlace}>Mi perfil</NavLink>}
               {!usuario && <NavLink to="/acceso" className={claseEnlace}>Acceder</NavLink>}
               <NavLink to="/reservar" className="btn btn-primario btn-pequeno">Reservar cita</NavLink>
             </>

@@ -59,7 +59,7 @@ function MisCitas() {
   const lista = grupos[pestaña];
 
   return (
-    <Pagina titulo="Mis citas">
+    <Pagina titulo="Mis citas" noIndexar>
       <CabeceraPagina
         titulo="Mis citas"
         subtitulo="Consulta tus próximas citas, revisa tu historial o cancela una cita si lo necesitas."

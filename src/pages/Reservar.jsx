@@ -119,7 +119,7 @@ function Reservar() {
 
   if (reservada) {
     return (
-      <Pagina titulo="Cita reservada">
+      <Pagina titulo="Cita reservada" noIndexar>
         <CabeceraPagina titulo="Reservar cita" />
         <section className="contenedor panel-flotante">
           <div className="tarjeta confirmacion">
@@ -142,7 +142,7 @@ function Reservar() {
   }
 
   return (
-    <Pagina titulo="Reservar cita">
+    <Pagina titulo="Reservar cita" noIndexar>
       <CabeceraPagina titulo="Reservar cita" subtitulo="Elige el día y la hora que mejor te vengan." />
 
       <section className="contenedor panel-flotante">

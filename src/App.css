@@ -1881,6 +1881,33 @@ input[type="date"] {
   color: var(--coral-texto);
 }
 
+/* ---- Mi perfil ---- */
+.perfil {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 820px;
+}
+
+.tarjeta-titulo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.3rem;
+}
+
+.perfil .tarjeta-titulo {
+  margin-bottom: 1rem;
+}
+
+.zona-peligro {
+  border-color: var(--rojo-fondo);
+}
+
+.zona-peligro .tarjeta-titulo {
+  color: var(--vino-oscuro);
+}
+
 /* ---- Añadir cita a mano (agenda) ---- */
 .btn-nueva-cita {
   margin-bottom: 1.2rem;

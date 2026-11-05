@@ -1,8 +1,9 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { HandHeart, Activity, Sparkles, CalendarCheck, MapPin, Phone, Navigation } from 'lucide-react';
 import Pagina from '../components/Pagina';
 import ProximosHuecos from '../components/ProximosHuecos';
 import EstadoClinica from '../components/EstadoClinica';
+import Aviso from '../components/Aviso';
 import { CLINICA, HORARIO } from '../datos/clinica';
 
 const servicios = [
@@ -21,12 +22,15 @@ const pasos = [
 
 function Inicio() {
   const hoy = new Date().getDay();
+  // Mensaje que llega de otra página (p. ej. "Tu cuenta se ha borrado")
+  const avisoRecibido = useLocation().state?.aviso;
 
   return (
     <Pagina>
       <section className="portada">
         <div className="contenedor portada-interior">
           <div className="portada-texto">
+            {avisoRecibido && <Aviso tipo="ok">{avisoRecibido}</Aviso>}
             <h1 className="portada-titulo">Fisioterapia cercana, aquí en Gilena</h1>
             <p className="portada-descripcion">
               Te atendemos en persona para aliviar el dolor, recuperarte de una lesión

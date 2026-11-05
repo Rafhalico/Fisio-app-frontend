@@ -64,6 +64,14 @@ function Acceso() {
     e.preventDefault();
     enviar(async () => {
       const response = await apiFetch('/login', { method: 'POST', body: JSON.stringify(login) });
+      // Cuenta sin verificar: el servidor ya le ha mandado un código nuevo; le pedimos que lo escriba.
+      if (response.status === 403) {
+        const pendiente = await response.json();
+        setUsuarioPendiente(pendiente.nombreusuario);
+        setCodigo('');
+        setEsperandoCodigo(true);
+        return setAviso({ tipo: 'info', texto: pendiente.mensaje });
+      }
       if (!response.ok) return setAviso({ tipo: 'error', texto: await response.text() });
       entrar(await response.json());
     });
@@ -222,7 +230,7 @@ function Acceso() {
                 {pestaña === 'login' ? (
                   <form onSubmit={handleLogin} className="formulario">
                     <div className="campo">
-                      <label htmlFor="login-usuario">Nombre de usuario</label>
+                      <label htmlFor="login-usuario">Usuario o correo</label>
                       <input id="login-usuario" name="nombreusuario" value={login.nombreusuario}
                         onChange={campo(setLogin)} autoComplete="username" autoCapitalize="none" required />
                     </div>
