@@ -32,13 +32,15 @@ function Acceso() {
   const [enlaceEnviado, setEnlaceEnviado] = useState(false);
 
   // A dónde mandar a alguien con sesión: la fisio a su agenda; el paciente, a donde iba (o a reservar).
-  const destino = (rol) => (rol === 'fisio' ? '/agenda' : desde && !desde.startsWith('/agenda') ? desde : '/reservar');
+  // El administrador vuelve a Administración si venía de ahí.
+  const destino = (rol, admin) => (admin && desde?.startsWith('/admin') ? desde
+    : rol === 'fisio' ? '/agenda' : desde && !desde.startsWith('/agenda') && !desde.startsWith('/admin') ? desde : '/reservar');
 
   // Si ya hay sesión, no tiene sentido mostrar el login.
   // (Este caso también se da justo después de entrar, así que debe ir al mismo destino.)
   const usuario = obtenerUsuario();
   if (usuario) {
-    return <Navigate to={destino(usuario.rol)} replace />;
+    return <Navigate to={destino(usuario.rol, usuario.admin)} replace />;
   }
 
   // Envuelve cada envío: pone el estado "enviando" y captura errores de conexión.
@@ -56,7 +58,7 @@ function Acceso() {
 
   function entrar(data) {
     guardarSesion(data);
-    navigate(destino(data.usuario.rol), { replace: true });
+    navigate(destino(data.usuario.rol, data.usuario.admin), { replace: true });
   }
 
   // "e.preventDefault()" evita que el formulario recargue la página al enviarse.
