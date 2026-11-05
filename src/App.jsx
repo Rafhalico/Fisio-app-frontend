@@ -8,11 +8,13 @@ import NoEncontrada from './pages/NoEncontrada';
 import Restablecer from './pages/Restablecer';
 import RutaProtegida from './components/RutaProtegida';
 import ScrollArriba from './components/ScrollArriba';
+import AvisoServidor from './components/AvisoServidor';
 import './App.css';
 function App() {
   return (
     <BrowserRouter>
       <ScrollArriba />
+      <AvisoServidor />
       <Routes>
         <Route path="/" element={<Inicio />} />
         <Route path="/acceso" element={<Acceso />} />

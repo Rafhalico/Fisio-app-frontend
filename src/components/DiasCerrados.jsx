@@ -141,7 +141,7 @@ function DiasCerrados({ bloqueos, plazasPorHora, onCambio, onIrADia }) {
                   return (
                     <li key={cita.id}>
                       <span>{capitalizar(dia)}, {hora} · {cita.nombre} {cita.apellidos}</span>
-                      <a href={`tel:${cita.telefono}`}><Phone size={14} aria-hidden="true" /> {cita.telefono}</a>
+                      {cita.telefono && <a href={`tel:${cita.telefono}`}><Phone size={14} aria-hidden="true" /> {cita.telefono}</a>}
                       <button type="button" className="btn-texto" onClick={() => onIrADia(cita.datetime.slice(0, 10))}>
                         Ir a ese día
                       </button>

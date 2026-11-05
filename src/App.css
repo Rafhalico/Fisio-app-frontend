@@ -1881,6 +1881,149 @@ input[type="date"] {
   color: var(--coral-texto);
 }
 
+/* ---- Añadir cita a mano (agenda) ---- */
+.btn-nueva-cita {
+  margin-bottom: 1.2rem;
+  gap: 0.4rem;
+}
+
+.nueva-cita {
+  margin-bottom: 1.4rem;
+  padding: 1.2rem 1.3rem;
+  border: 1.5px solid var(--borde);
+  border-left: 4px solid var(--coral);
+  border-radius: var(--radio);
+  background-color: var(--crema);
+}
+
+.nueva-cita-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nueva-cita-cabecera h3 {
+  font-size: 1.15rem;
+  color: var(--vino);
+}
+
+.nueva-cita .texto-suave {
+  margin-top: -0.6rem;
+  font-size: 0.85rem;
+}
+
+.nueva-cita select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1.5px solid var(--borde);
+  border-radius: var(--radio-pequeno);
+  background-color: var(--blanco);
+  color: var(--texto);
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
+.nueva-cita select:focus {
+  outline: none;
+  border-color: var(--coral);
+  box-shadow: 0 0 0 3px rgba(231, 111, 60, 0.15);
+}
+
+.nueva-cita-botones {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.opcional {
+  color: var(--texto-suave);
+  font-weight: 400;
+}
+
+.btn-icono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--texto-suave);
+  cursor: pointer;
+}
+
+.btn-icono:hover {
+  background-color: var(--gris-claro);
+  color: var(--vino);
+}
+
+.etiqueta-manual {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: 0.5rem;
+  background-color: var(--crema-2);
+  color: var(--coral-texto);
+  vertical-align: 0.1em;
+}
+
+/* ---- Aviso "Conectando con la clínica…" (servidor dormido) ---- */
+.aviso-servidor {
+  position: fixed;
+  left: 50%;
+  bottom: 1.2rem;
+  z-index: 100;
+  transform: translate(-50%, 150%);
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  width: max-content;
+  max-width: calc(100% - 2rem);
+  padding: 0.85rem 1.2rem;
+  border-radius: var(--radio);
+  background-color: var(--texto);
+  color: var(--blanco);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.aviso-servidor.visible {
+  transform: translate(-50%, 0);
+  opacity: 1;
+}
+
+.aviso-servidor strong,
+.aviso-servidor small {
+  display: block;
+}
+
+.aviso-servidor small {
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+
+.girando {
+  flex-shrink: 0;
+  width: 1.3rem;
+  height: 1.3rem;
+  border: 2.5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: var(--melocoton);
+  border-radius: 50%;
+  animation: girar 0.9s linear infinite;
+}
+
+@keyframes girar {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .girando { animation-duration: 3s; }
+  .aviso-servidor { transition: none; }
+}
+
 /* =========================================================
    ADAPTACIÓN A TABLET Y MÓVIL
    ========================================================= */
@@ -2015,8 +2158,15 @@ input[type="date"] {
     align-items: stretch;
   }
   .pestaña {
-    padding: 0.55rem 0.5rem;
-    font-size: 0.85rem;
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 0.55rem 0.25rem;
+    font-size: 0.8rem;
+  }
+  .pestaña .contador {
+    min-width: 1.2rem;
+    margin-left: 0.2rem;
+    padding: 0 0.3rem;
   }
   .cita-card {
     flex-wrap: wrap;
@@ -2031,5 +2181,12 @@ input[type="date"] {
   }
   .acceso-numero {
     font-size: 1.7rem;
+  }
+}
+
+/* Móviles muy estrechos (320 px): las tres pestañas no caben con el número al lado */
+@media (max-width: 359px) {
+  .pestaña .contador {
+    display: none;
   }
 }
