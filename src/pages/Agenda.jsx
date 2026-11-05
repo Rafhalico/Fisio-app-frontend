@@ -19,6 +19,8 @@ function Agenda() {
   const [recarga, setRecarga] = useState(0);
   const [bloqueos, setBloqueos] = useState([]);
   const [recargaBloqueos, setRecargaBloqueos] = useState(0);
+  // 'mias' = solo mis citas; 'todas' = las de toda la clínica
+  const [vista, setVista] = useState('mias');
 
   useEffect(() => {
     let activo = true;
@@ -29,11 +31,19 @@ function Agenda() {
     return () => { activo = false; };
   }, [recargaBloqueos]);
 
-  // Días cerrados, para marcarlos en el calendario, y el cierre del día que se está viendo.
+  // Días cerrados (míos o de toda la clínica), para marcarlos en el calendario,
+  // y el cierre del día que se está viendo.
   const diasCerrados = new Set(bloqueos.flatMap((b) => diasDelRango(b.fechainicio, b.fechafin)));
   const cierreDelDia = bloqueos.find((b) => fecha >= b.fechainicio && fecha <= b.fechafin);
 
-  function irADia(dia) {
+  function cambiarVista(nueva) {
+    setVista(nueva);
+    setCargando(true);
+    setAviso(null);
+  }
+
+  function irADia(dia, todas = false) {
+    if (todas) setVista('todas');
     elegirFecha(dia);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -46,13 +56,13 @@ function Agenda() {
 
   useEffect(() => {
     let activo = true;
-    apiFetch(`/appointments?fecha=${fecha}`)
+    apiFetch(`/appointments?fecha=${fecha}${vista === 'todas' ? '&todas=1' : ''}`)
       .then((response) => (response.ok ? response.json() : []))
       .then((data) => { if (activo) setCitas(data); })
       .catch(() => { if (activo) setAviso({ tipo: 'error', texto: ERROR_CONEXION }); })
       .finally(() => { if (activo) setCargando(false); });
     return () => { activo = false; };
-  }, [fecha, recarga]);
+  }, [fecha, recarga, vista]);
 
   // La fisio puede cancelar sin la restricción de 24 h (lo controla el backend).
   // El motivo le llega al paciente por correo; el servidor responde si se ha podido enviar.
@@ -74,7 +84,7 @@ function Agenda() {
 
   return (
     <Pagina titulo="Mi agenda">
-      <CabeceraPagina titulo="Mi agenda" subtitulo={`Hola, ${usuario.nombre}. Estas son las citas de tus pacientes.`} />
+      <CabeceraPagina titulo="Mi agenda" subtitulo={`Hola, ${usuario.nombre}. Aquí tienes las citas de tus pacientes y las de la clínica.`} />
 
       <section className="contenedor panel-flotante">
         <div className="tarjeta panel-dos-columnas agenda">
@@ -86,6 +96,16 @@ function Agenda() {
           </div>
 
           <div>
+            <div className="pestañas agenda-vista" role="tablist">
+              <button type="button" role="tab" aria-selected={vista === 'mias'}
+                className={vista === 'mias' ? 'pestaña activa' : 'pestaña'} onClick={() => cambiarVista('mias')}>
+                Mis citas
+              </button>
+              <button type="button" role="tab" aria-selected={vista === 'todas'}
+                className={vista === 'todas' ? 'pestaña activa' : 'pestaña'} onClick={() => cambiarVista('todas')}>
+                Toda la clínica
+              </button>
+            </div>
             <div className="agenda-cabecera">
               <h2>{capitalizar(formatearDia(fecha))}</h2>
               {!cargando && <span className="contador grande">{numero} {numero === 1 ? 'cita' : 'citas'}</span>}
@@ -93,7 +113,9 @@ function Agenda() {
             {cierreDelDia && (
               <p className="banda-cerrado">
                 <CalendarOff size={18} aria-hidden="true" />
-                Has cerrado este día{cierreDelDia.motivo ? ` (${cierreDelDia.motivo})` : ''}. Los pacientes no pueden reservar.
+                {cierreDelDia.todalaclinica ? 'La clínica está cerrada' : 'Has cerrado'} este día
+                {cierreDelDia.motivo ? ` (${cierreDelDia.motivo})` : ''}.
+                {cierreDelDia.todalaclinica ? ' Nadie puede reservar.' : ' Los pacientes no pueden reservar contigo.'}
               </p>
             )}
             <Aviso tipo={aviso?.tipo}>{aviso?.texto}</Aviso>
@@ -104,21 +126,30 @@ function Agenda() {
               <p className="estado-vacio">No hay citas este día.</p>
             ) : (
               <div className="lista-citas">
-                {citas.map((cita) => (
-                  <CitaCard
-                    key={cita.id}
-                    cita={cita}
-                    onCancelar={handleCancelar}
-                    pedirMotivo
-                    vistaDia
-                    titulo={<><User size={15} aria-hidden="true" /> {cita.nombre} {cita.apellidos}</>}
-                    detalle={
-                      <div className="cita-paciente">
-                        <a href={`tel:${cita.telefono}`}><Phone size={14} aria-hidden="true" /> {cita.telefono}</a>
-                      </div>
-                    }
-                  />
-                ))}
+                {citas.map((cita) => {
+                  // Cada fisio solo puede cancelar sus propias citas.
+                  const esMia = cita.idfisio === usuario.id;
+                  return (
+                    <CitaCard
+                      key={cita.id}
+                      cita={cita}
+                      onCancelar={esMia ? handleCancelar : null}
+                      pedirMotivo
+                      vistaDia
+                      titulo={<><User size={15} aria-hidden="true" /> {cita.nombre} {cita.apellidos}</>}
+                      detalle={
+                        <div className="cita-paciente">
+                          <a href={`tel:${cita.telefono}`}><Phone size={14} aria-hidden="true" /> {cita.telefono}</a>
+                          {vista === 'todas' && (
+                            <span className={esMia ? 'cita-fisio mia' : 'cita-fisio'}>
+                              {esMia ? 'Tuya' : `Con ${cita.nombrefisio}`}
+                            </span>
+                          )}
+                        </div>
+                      }
+                    />
+                  );
+                })}
               </div>
             )}
           </div>

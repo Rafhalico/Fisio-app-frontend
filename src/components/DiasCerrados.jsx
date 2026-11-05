@@ -8,12 +8,13 @@ import { hoyTexto, formatearRango, partesCita, capitalizar } from '../utils/fech
 // Props:
 // - bloqueos: lista de cierres de la fisio [{ id, fechainicio, fechafin, motivo }]
 // - onCambio(): para que la agenda vuelva a pedir los cierres tras crear o borrar uno
-// - onIrADia(fecha): lleva la agenda a ese día (para ver y cancelar las citas afectadas)
+// - onIrADia(fecha, todas): lleva la agenda a ese día (todas = vista de toda la clínica)
 function DiasCerrados({ bloqueos, onCambio, onIrADia }) {
   const hoy = hoyTexto();
   const [desde, setDesde] = useState('');
   const [hasta, setHasta] = useState('');
   const [motivo, setMotivo] = useState('');
+  const [todaLaClinica, setTodaLaClinica] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [aviso, setAviso] = useState(null);
   const [afectadas, setAfectadas] = useState([]);
@@ -27,7 +28,7 @@ function DiasCerrados({ bloqueos, onCambio, onIrADia }) {
     try {
       const response = await apiFetch('/bloqueos', {
         method: 'POST',
-        body: JSON.stringify({ fechaInicio: desde, fechaFin: hasta || desde, motivo })
+        body: JSON.stringify({ fechaInicio: desde, fechaFin: hasta || desde, motivo, todaLaClinica })
       });
       if (!response.ok) {
         setAviso({ tipo: 'error', texto: await response.text() });
@@ -35,15 +36,18 @@ function DiasCerrados({ bloqueos, onCambio, onIrADia }) {
       }
       const { bloqueo, citasAfectadas } = await response.json();
       const unSoloDia = bloqueo.fechainicio === bloqueo.fechafin;
+      const cuando = `${unSoloDia ? 'el ' : ''}${formatearRango(bloqueo.fechainicio, bloqueo.fechafin)}`;
       setAviso({
         tipo: 'ok',
-        texto: `Has cerrado ${unSoloDia ? 'el ' : ''}${formatearRango(bloqueo.fechainicio, bloqueo.fechafin)}. `
-          + `Los pacientes ya no pueden reservar ${unSoloDia ? 'ese día' : 'esos días'}.`
+        texto: bloqueo.todalaclinica
+          ? `Has cerrado la clínica ${cuando}. Nadie puede reservar ${unSoloDia ? 'ese día' : 'esos días'}.`
+          : `Has cerrado ${cuando}. Los pacientes ya no pueden reservar contigo ${unSoloDia ? 'ese día' : 'esos días'}.`
       });
       setAfectadas(citasAfectadas);
       setDesde('');
       setHasta('');
       setMotivo('');
+      setTodaLaClinica(false);
       onCambio();
     } catch {
       setAviso({ tipo: 'error', texto: ERROR_CONEXION });
@@ -90,8 +94,15 @@ function DiasCerrados({ bloqueos, onCambio, onIrADia }) {
             <label htmlFor="cierre-motivo">Motivo</label>
             <input id="cierre-motivo" value={motivo} maxLength={100} placeholder="Ej: vacaciones"
               onChange={(e) => setMotivo(e.target.value)} aria-describedby="ayuda-motivo" />
-            <small id="ayuda-motivo">Solo lo ves tú. Los pacientes solo verán que ese día no hay citas.</small>
+            <small id="ayuda-motivo">Solo lo veis las fisios. Los pacientes solo verán que ese día no hay citas.</small>
           </div>
+          <label className="casilla">
+            <input type="checkbox" checked={todaLaClinica} onChange={(e) => setTodaLaClinica(e.target.checked)} />
+            <span>
+              <strong>Cerrar toda la clínica</strong>
+              <small>Para festivos o días en los que no atiende nadie. Si no la marcas, solo se cierra tu agenda.</small>
+            </span>
+          </label>
           <button type="submit" className="btn btn-primario" disabled={enviando || !desde}>
             {enviando ? 'Guardando…' : 'Cerrar estos días'}
           </button>
@@ -106,16 +117,20 @@ function DiasCerrados({ bloqueos, onCambio, onIrADia }) {
                 <strong>
                   Ya había {afectadas.length === 1 ? '1 cita' : `${afectadas.length} citas`} esos días y siguen en pie.
                 </strong>{' '}
-                Cancélalas desde la agenda para que al paciente le llegue un correo:
+                Cancélalas desde la agenda para que al paciente le llegue un correo
+                {afectadas.some((c) => !c.esmia) && ' (las de otra fisio tiene que cancelarlas ella)'}:
               </p>
               <ul>
                 {afectadas.map((cita) => {
                   const { dia, hora } = partesCita(cita.datetime);
                   return (
                     <li key={cita.id}>
-                      <span>{capitalizar(dia)}, {hora} · {cita.nombre} {cita.apellidos}</span>
+                      <span>
+                        {capitalizar(dia)}, {hora} · {cita.nombre} {cita.apellidos}
+                        {!cita.esmia && cita.nombrefisio && ` (con ${cita.nombrefisio})`}
+                      </span>
                       <a href={`tel:${cita.telefono}`}><Phone size={14} aria-hidden="true" /> {cita.telefono}</a>
-                      <button type="button" className="btn-texto" onClick={() => onIrADia(cita.datetime.slice(0, 10))}>
+                      <button type="button" className="btn-texto" onClick={() => onIrADia(cita.datetime.slice(0, 10), !cita.esmia)}>
                         Ir a ese día
                       </button>
                     </li>
@@ -133,8 +148,16 @@ function DiasCerrados({ bloqueos, onCambio, onIrADia }) {
               {bloqueos.map((b) => (
                 <li key={b.id}>
                   <div>
-                    <span className="cierre-fechas">{capitalizar(formatearRango(b.fechainicio, b.fechafin))}</span>
-                    {b.motivo && <span className="cierre-motivo">{b.motivo}</span>}
+                    <span className="cierre-fechas">
+                      {capitalizar(formatearRango(b.fechainicio, b.fechafin))}
+                      {b.todalaclinica && <span className="etiqueta etiqueta-clinica">Toda la clínica</span>}
+                    </span>
+                    {(b.motivo || b.todalaclinica) && (
+                      <span className="cierre-motivo">
+                        {b.motivo}
+                        {b.todalaclinica && b.nombreautor && `${b.motivo ? ' · ' : ''}Lo cerró ${b.nombreautor}`}
+                      </span>
+                    )}
                   </div>
                   {confirmandoId === b.id ? (
                     <div className="confirmar-cancelacion">

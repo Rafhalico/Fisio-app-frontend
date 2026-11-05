@@ -1730,6 +1730,121 @@ input[type="date"] {
 }
 
 /* =========================================================
+   VARIAS FISIOS
+   ========================================================= */
+.selector-fisio {
+  padding-bottom: 1.6rem;
+  margin-bottom: 1.8rem;
+  border-bottom: 1px solid var(--borde);
+}
+
+.opciones-fisio {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.opcion-fisio {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
+  min-width: 11rem;
+  padding: 0.75rem 1.1rem;
+  border: 1.5px solid var(--borde);
+  border-radius: var(--radio-pequeno);
+  background-color: var(--blanco);
+  color: var(--texto);
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.opcion-fisio svg {
+  display: inline;
+  vertical-align: -3px;
+  margin-right: 0.3rem;
+  color: var(--vino);
+}
+
+.opcion-fisio small {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--texto-suave);
+}
+
+.opcion-fisio:hover {
+  border-color: var(--vino);
+}
+
+.opcion-fisio.activa {
+  border-color: var(--vino);
+  background-color: var(--crema-2);
+  color: var(--vino);
+  box-shadow: inset 0 0 0 1px var(--vino);
+}
+
+.cita-con {
+  font-size: 0.85rem;
+  color: var(--texto-suave);
+}
+
+.cita-fisio {
+  padding: 0.05rem 0.6rem;
+  border-radius: 999px;
+  background-color: var(--gris-claro);
+  color: var(--texto-suave);
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.cita-fisio.mia {
+  background-color: var(--crema-2);
+  color: var(--vino);
+}
+
+.agenda-vista {
+  max-width: 320px;
+}
+
+.casilla {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-pequeno);
+  cursor: pointer;
+}
+
+.casilla input {
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.2rem;
+  accent-color: var(--vino);
+  flex-shrink: 0;
+}
+
+.casilla span {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
+}
+
+.casilla small {
+  font-size: 0.78rem;
+  color: var(--texto-suave);
+}
+
+.etiqueta-clinica {
+  margin-left: 0.5rem;
+  background-color: var(--rojo-fondo);
+  color: var(--vino-oscuro);
+  vertical-align: 0.1em;
+}
+
+/* =========================================================
    ADAPTACIÓN A TABLET Y MÓVIL
    ========================================================= */
 @media (max-width: 980px) {
@@ -1832,6 +1947,9 @@ input[type="date"] {
   .panel-dos-columnas {
     grid-template-columns: 1fr;
     gap: 2rem;
+  }
+  .opcion-fisio {
+    flex: 1 1 100%;
   }
   .calendario {
     max-width: 380px;
