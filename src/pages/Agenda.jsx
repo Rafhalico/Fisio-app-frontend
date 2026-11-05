@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Phone, User, CalendarOff, Hand } from 'lucide-react';
+import { Phone, User, CalendarOff } from 'lucide-react';
 import Pagina, { CabeceraPagina } from '../components/Pagina';
 import Calendario from '../components/Calendario';
 import CitaCard from '../components/CitaCard';
@@ -9,13 +9,13 @@ import { apiFetch, ERROR_CONEXION } from '../api';
 import { obtenerUsuario } from '../sesion';
 import { hoyTexto, formatearDia, capitalizar, diasDelRango } from '../utils/fechas';
 
-// Agenda compartida: las dos fisios ven todas las citas de la clínica y cada una
-// puede marcar con "Lo atiendo yo" a qué pacientes atiende.
+// Agenda compartida: las dos fisios ven todas las citas de la clínica y se las reparten
+// con el desplegable "Asignar a" (cualquiera de las dos puede asignar a cualquiera).
 function Agenda() {
   const usuario = obtenerUsuario();
   // Al entrar se muestra directamente el día de hoy.
   const [fecha, setFecha] = useState(hoyTexto());
-  const [dia, setDia] = useState({ citas: [], huecos: [], plazas: 0 });
+  const [dia, setDia] = useState({ citas: [], huecos: [], plazas: 0, fisios: [] });
   const [cargando, setCargando] = useState(true);
   const [aviso, setAviso] = useState(null);
   const [recarga, setRecarga] = useState(0);
@@ -55,7 +55,7 @@ function Agenda() {
   useEffect(() => {
     let activo = true;
     apiFetch(`/appointments?fecha=${fecha}`)
-      .then((response) => (response.ok ? response.json() : { citas: [], huecos: [], plazas: 0 }))
+      .then((response) => (response.ok ? response.json() : { citas: [], huecos: [], plazas: 0, fisios: [] }))
       .then((data) => { if (activo) setDia(data); })
       .catch(() => { if (activo) setAviso({ tipo: 'error', texto: ERROR_CONEXION }); })
       .finally(() => { if (activo) setCargando(false); });
@@ -78,12 +78,12 @@ function Agenda() {
     }
   }
 
-  // "Lo atiendo yo" (atender = true) o "Soltar" (atender = false)
-  async function handleAtender(idCita, atender) {
+  // Asignar la cita a una fisio, o dejarla sin asignar (idFisio = '')
+  async function handleAsignar(idCita, idFisio) {
     try {
-      const response = await apiFetch(`/appointments/${idCita}/atender`, {
+      const response = await apiFetch(`/appointments/${idCita}/asignar`, {
         method: 'PUT',
-        body: JSON.stringify({ atender })
+        body: JSON.stringify({ idFisio: idFisio === '' ? null : Number(idFisio) })
       });
       setAviso(response.ok ? null : { tipo: 'error', texto: await response.text() });
       setRecarga((n) => n + 1);
@@ -92,14 +92,14 @@ function Agenda() {
     }
   }
 
-  const { citas, huecos, plazas } = dia;
+  const { citas, huecos, plazas, fisios } = dia;
   const numero = citas.length;
 
   return (
     <Pagina titulo="Agenda">
       <CabeceraPagina
         titulo="Agenda de la clínica"
-        subtitulo={`Hola, ${usuario.nombre}. Aquí veis las dos todas las citas; marca con «Lo atiendo yo» las que te quedas.`}
+        subtitulo={`Hola, ${usuario.nombre}. Aquí veis los dos todas las citas; repartidlas con «Asignar a».`}
       />
 
       <section className="contenedor panel-flotante">
@@ -146,38 +146,34 @@ function Agenda() {
               <p className="estado-vacio">No hay citas este día.</p>
             ) : (
               <div className="lista-citas">
-                {citas.map((cita) => {
-                  const esMia = cita.idfisio === usuario.id;
-                  return (
-                    <CitaCard
-                      key={cita.id}
-                      cita={cita}
-                      onCancelar={handleCancelar}
-                      pedirMotivo
-                      vistaDia
-                      titulo={<><User size={15} aria-hidden="true" /> {cita.nombre} {cita.apellidos}</>}
-                      detalle={
-                        <div className="cita-paciente">
-                          <a href={`tel:${cita.telefono}`}><Phone size={14} aria-hidden="true" /> {cita.telefono}</a>
-                          {!cita.idfisio ? (
-                            <button type="button" className="btn-atender" onClick={() => handleAtender(cita.id, true)}>
-                              <Hand size={14} aria-hidden="true" /> Lo atiendo yo
-                            </button>
-                          ) : esMia ? (
-                            <span className="cita-fisio mia">
-                              La atiendes tú
-                              <button type="button" className="btn-texto" onClick={() => handleAtender(cita.id, false)}>
-                                Soltar
-                              </button>
-                            </span>
-                          ) : (
-                            <span className="cita-fisio">La atiende {cita.nombrefisio}</span>
-                          )}
+                {citas.map((cita) => (
+                  <CitaCard
+                    key={cita.id}
+                    cita={cita}
+                    onCancelar={handleCancelar}
+                    pedirMotivo
+                    vistaDia
+                    titulo={<><User size={15} aria-hidden="true" /> {cita.nombre} {cita.apellidos}</>}
+                    detalle={
+                      <div className="cita-paciente">
+                        <a href={`tel:${cita.telefono}`}><Phone size={14} aria-hidden="true" /> {cita.telefono}</a>
+                        <label className={cita.idfisio ? 'asignar asignada' : 'asignar'}>
+                          <span>{cita.idfisio ? 'La atiende' : 'Asignar a'}</span>
+                          <select
+                            value={cita.idfisio ?? ''}
+                            onChange={(e) => handleAsignar(cita.id, e.target.value)}
+                            aria-label={`Asignar la cita de ${cita.nombre} a`}
+                          >
+                            <option value="">Sin asignar</option>
+                            {fisios.map((f) => (
+                              <option key={f.id} value={f.id}>{f.id === usuario.id ? `${f.nombre} (tú)` : f.nombre}</option>
+                              ))}
+                            </select>
+                          </label>
                         </div>
                       }
                     />
-                  );
-                })}
+                ))}
               </div>
             )}
           </div>
