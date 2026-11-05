@@ -1732,59 +1732,6 @@ input[type="date"] {
 /* =========================================================
    VARIAS FISIOS
    ========================================================= */
-.selector-fisio {
-  padding-bottom: 1.6rem;
-  margin-bottom: 1.8rem;
-  border-bottom: 1px solid var(--borde);
-}
-
-.opciones-fisio {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-}
-
-.opcion-fisio {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.1rem;
-  min-width: 11rem;
-  padding: 0.75rem 1.1rem;
-  border: 1.5px solid var(--borde);
-  border-radius: var(--radio-pequeno);
-  background-color: var(--blanco);
-  color: var(--texto);
-  font-weight: 500;
-  text-align: left;
-  cursor: pointer;
-  transition: border-color 0.15s, background-color 0.15s;
-}
-
-.opcion-fisio svg {
-  display: inline;
-  vertical-align: -3px;
-  margin-right: 0.3rem;
-  color: var(--vino);
-}
-
-.opcion-fisio small {
-  font-size: 0.75rem;
-  font-weight: 400;
-  color: var(--texto-suave);
-}
-
-.opcion-fisio:hover {
-  border-color: var(--vino);
-}
-
-.opcion-fisio.activa {
-  border-color: var(--vino);
-  background-color: var(--crema-2);
-  color: var(--vino);
-  box-shadow: inset 0 0 0 1px var(--vino);
-}
-
 .cita-con {
   font-size: 0.85rem;
   color: var(--texto-suave);
@@ -1947,9 +1894,6 @@ input[type="date"] {
   .panel-dos-columnas {
     grid-template-columns: 1fr;
     gap: 2rem;
-  }
-  .opcion-fisio {
-    flex: 1 1 100%;
   }
   .calendario {
     max-width: 380px;

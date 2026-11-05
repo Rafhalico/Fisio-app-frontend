@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { CalendarCheck, Clock, Users } from 'lucide-react';
+import { CalendarCheck, Clock } from 'lucide-react';
 import Pagina, { CabeceraPagina } from '../components/Pagina';
 import Calendario from '../components/Calendario';
 import Aviso from '../components/Aviso';
@@ -33,44 +33,16 @@ function Reservar() {
   const [aviso, setAviso] = useState('');
   const [reservada, setReservada] = useState(null); // { fecha, hora } tras reservar
   const [recarga, setRecarga] = useState(0);
-  // Fisios de la clínica y la elegida ('' = me da igual).
-  const [fisios, setFisios] = useState([]);
-  const [fisioElegida, setFisioElegida] = useState('');
-  // Días cerrados (vacaciones, festivos...) en los próximos meses: los de la clínica
-  // o, si se ha elegido una fisio, los de esa fisio.
+  // Días que la clínica ha cerrado (vacaciones, festivos...) en los próximos meses.
   const [diasCerrados, setDiasCerrados] = useState(() => new Set());
 
   useEffect(() => {
-    apiFetch('/fisios')
-      .then((response) => (response.ok ? response.json() : []))
-      .then(setFisios)
-      .catch(() => {});
-  }, []);
-
-  // Parte de la dirección para filtrar por fisio: "&idFisio=3" o nada.
-  const filtroFisio = fisioElegida ? `&idFisio=${fisioElegida}` : '';
-
-  useEffect(() => {
     const hoy = hoyTexto();
-    apiFetch(`/dias-cerrados?desde=${hoy}&hasta=${sumarDias(hoy, 180)}${filtroFisio}`)
+    apiFetch(`/dias-cerrados?desde=${hoy}&hasta=${sumarDias(hoy, 180)}`)
       .then((response) => (response.ok ? response.json() : []))
       .then((dias) => setDiasCerrados(new Set(dias)))
       .catch(() => {}); // si falla, el servidor seguirá rechazando esos días al reservar
-  }, [filtroFisio]);
-
-  const nombreFisio = (id) => {
-    const fisio = fisios.find((f) => String(f.id) === String(id));
-    return fisio ? `${fisio.nombre} ${fisio.apellidos}`.trim() : '';
-  };
-
-  // Al cambiar de profesional se vuelve a elegir día y hora (su agenda es distinta).
-  function elegirFisio(id) {
-    setFisioElegida(id);
-    setFecha('');
-    setHoras([]);
-    setHoraSeleccionada('');
-    setAviso('');
-  }
+  }, []);
 
   const esDiaReservable = (dia) => esDiaDeApertura(dia) && !diasCerrados.has(dia);
 
@@ -88,7 +60,7 @@ function Reservar() {
   useEffect(() => {
     if (!fecha) return;
     let activo = true;
-    apiFetch(`/appointments/available?fecha=${fecha}${filtroFisio}`)
+    apiFetch(`/appointments/available?fecha=${fecha}`)
       .then(async (response) => {
         if (!activo) return;
         if (!response.ok) {
@@ -111,7 +83,7 @@ function Reservar() {
       .catch(() => activo && setErrorHoras(ERROR_CONEXION))
       .finally(() => activo && setCargando(false));
     return () => { activo = false; };
-  }, [fecha, recarga, filtroFisio]);
+  }, [fecha, recarga]);
 
   async function handleReservar(e) {
     e.preventDefault();
@@ -120,11 +92,7 @@ function Reservar() {
     try {
       const response = await apiFetch('/appointments', {
         method: 'POST',
-        body: JSON.stringify({
-          datetime: `${fecha} ${horaSeleccionada}`,
-          motivo: motivo.trim(),
-          ...(fisioElegida ? { idFisio: Number(fisioElegida) } : {})
-        })
+        body: JSON.stringify({ datetime: `${fecha} ${horaSeleccionada}`, motivo: motivo.trim() })
       });
       if (!response.ok) {
         // Por ejemplo, si otra persona ha cogido el hueco mientras tanto.
@@ -133,7 +101,7 @@ function Reservar() {
         setRecarga((n) => n + 1);
         return;
       }
-      setReservada({ fecha, hora: horaSeleccionada, fisio: nombreFisio(fisioElegida) });
+      setReservada({ fecha, hora: horaSeleccionada });
     } catch {
       setAviso(ERROR_CONEXION);
     } finally {
@@ -149,10 +117,6 @@ function Reservar() {
     setMotivo('');
   }
 
-  // Si solo hay una fisio no tiene sentido preguntar con quién.
-  const hayVarias = fisios.length > 1;
-  const paso = hayVarias ? 1 : 0;
-
   if (reservada) {
     return (
       <Pagina titulo="Cita reservada">
@@ -163,10 +127,9 @@ function Reservar() {
             <h2>¡Cita reservada!</h2>
             <p className="confirmacion-fecha">
               {capitalizar(formatearDia(reservada.fecha))} a las {reservada.hora}
-              {reservada.fisio && <> con {reservada.fisio}</>}
             </p>
             <p className="texto-suave">
-              {!reservada.fisio && 'En «Mis citas» verás con qué fisioterapeuta es. '}
+              En «Mis citas» verás con qué fisioterapeuta es.
               Si no puedes venir, cancélala desde «Mis citas» con al menos 24 horas de antelación.
             </p>
             <div className="botones-fila">
@@ -184,89 +147,64 @@ function Reservar() {
       <CabeceraPagina titulo="Reservar cita" subtitulo="Elige el día y la hora que mejor te vengan." />
 
       <section className="contenedor panel-flotante">
-        <div className="tarjeta">
-          {hayVarias && (
-            <div className="selector-fisio">
-              <h2 className="paso-titulo"><span>1</span> ¿Con quién?</h2>
-              <div className="opciones-fisio" role="radiogroup" aria-label="Fisioterapeuta">
-                <button type="button" role="radio" aria-checked={fisioElegida === ''}
-                  className={fisioElegida === '' ? 'opcion-fisio activa' : 'opcion-fisio'}
-                  onClick={() => elegirFisio('')}>
-                  <Users size={16} aria-hidden="true" /> Me da igual
-                  <small>Más horas disponibles</small>
+        <div className="tarjeta panel-dos-columnas">
+          <div>
+            <h2 className="paso-titulo"><span>1</span> Elige el día</h2>
+            <Calendario fechaSeleccionada={fecha} onSeleccionarFecha={elegirFecha} esDiaDisponible={esDiaReservable} />
+            <p className="nota-calendario">Abrimos de lunes a viernes. Los días en gris no tienen citas disponibles.</p>
+          </div>
+
+          <div>
+            <h2 className="paso-titulo"><span>2</span> Elige la hora</h2>
+            {!fecha && <p className="estado-vacio">Selecciona un día en el calendario para ver las horas libres.</p>}
+            {fecha && cargando && <p className="estado-vacio">Buscando huecos libres…</p>}
+            {fecha && !cargando && errorHoras && <Aviso tipo="error">{errorHoras}</Aviso>}
+            {fecha && !cargando && !errorHoras && horas.length === 0 && (
+              <p className="estado-vacio">No quedan horas disponibles este día. Prueba con otro.</p>
+            )}
+            {fecha && !cargando && horas.length > 0 && (
+              <>
+                <p className="texto-suave dia-elegido">{capitalizar(formatearDia(fecha))}</p>
+                <div className="horas-grid">
+                  {horas.map(({ hora, huecosLibres }) => (
+                    <button
+                      type="button"
+                      key={hora}
+                      className={hora === horaSeleccionada ? 'hora seleccionada' : 'hora'}
+                      disabled={huecosLibres === 0}
+                      aria-pressed={hora === horaSeleccionada}
+                      onClick={() => setHoraSeleccionada(hora)}
+                    >
+                      <Clock size={14} aria-hidden="true" /> {hora}
+                      {huecosLibres === 0 && <span className="hora-estado">Completo</span>}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {horaSeleccionada && (
+              <form onSubmit={handleReservar} className="formulario reservar-form">
+                <h2 className="paso-titulo"><span>3</span> Confirma tu cita</h2>
+                <div className="campo">
+                  <label htmlFor="motivo">Motivo de la consulta</label>
+                  <textarea
+                    id="motivo" rows={2} maxLength={200} required
+                    placeholder="Ej: dolor de espalda desde hace una semana"
+                    value={motivo} onChange={(e) => setMotivo(e.target.value)}
+                  />
+                </div>
+                <div className="resumen-reserva">
+                  <CalendarCheck size={20} aria-hidden="true" />
+                  <span>{capitalizar(formatearDia(fecha))} a las <strong>{horaSeleccionada}</strong></span>
+                </div>
+                <Aviso tipo="error">{aviso}</Aviso>
+                <button type="submit" className="btn btn-primario btn-bloque" disabled={enviando || !motivo.trim()}>
+                  {enviando ? 'Reservando…' : 'Confirmar cita'}
                 </button>
-                {fisios.map((f) => (
-                  <button type="button" role="radio" key={f.id} aria-checked={String(f.id) === fisioElegida}
-                    className={String(f.id) === fisioElegida ? 'opcion-fisio activa' : 'opcion-fisio'}
-                    onClick={() => elegirFisio(String(f.id))}>
-                    {f.nombre} {f.apellidos}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-          <div className="panel-dos-columnas">
-            <div>
-              <h2 className="paso-titulo"><span>{1 + paso}</span> Elige el día</h2>
-              <Calendario fechaSeleccionada={fecha} onSeleccionarFecha={elegirFecha} esDiaDisponible={esDiaReservable} />
-              <p className="nota-calendario">Abrimos de lunes a viernes. Los días en gris no tienen citas disponibles.</p>
-            </div>
-
-            <div>
-              <h2 className="paso-titulo"><span>{2 + paso}</span> Elige la hora</h2>
-              {!fecha && <p className="estado-vacio">Selecciona un día en el calendario para ver las horas libres.</p>}
-              {fecha && cargando && <p className="estado-vacio">Buscando huecos libres…</p>}
-              {fecha && !cargando && errorHoras && <Aviso tipo="error">{errorHoras}</Aviso>}
-              {fecha && !cargando && !errorHoras && horas.length === 0 && (
-                <p className="estado-vacio">No quedan horas disponibles este día. Prueba con otro.</p>
-              )}
-              {fecha && !cargando && horas.length > 0 && (
-                <>
-                  <p className="texto-suave dia-elegido">{capitalizar(formatearDia(fecha))}</p>
-                  <div className="horas-grid">
-                    {horas.map(({ hora, huecosLibres }) => (
-                      <button
-                        type="button"
-                        key={hora}
-                        className={hora === horaSeleccionada ? 'hora seleccionada' : 'hora'}
-                        disabled={huecosLibres === 0}
-                        aria-pressed={hora === horaSeleccionada}
-                        onClick={() => setHoraSeleccionada(hora)}
-                      >
-                        <Clock size={14} aria-hidden="true" /> {hora}
-                        {huecosLibres === 0 && <span className="hora-estado">Completo</span>}
-                      </button>
-                    ))}
-                  </div>
-                </>
-              )}
-
-              {horaSeleccionada && (
-                <form onSubmit={handleReservar} className="formulario reservar-form">
-                  <h2 className="paso-titulo"><span>{3 + paso}</span> Confirma tu cita</h2>
-                  <div className="campo">
-                    <label htmlFor="motivo">Motivo de la consulta</label>
-                    <textarea
-                      id="motivo" rows={2} maxLength={200} required
-                      placeholder="Ej: dolor de espalda desde hace una semana"
-                      value={motivo} onChange={(e) => setMotivo(e.target.value)}
-                    />
-                  </div>
-                  <div className="resumen-reserva">
-                    <CalendarCheck size={20} aria-hidden="true" />
-                    <span>
-                      {capitalizar(formatearDia(fecha))} a las <strong>{horaSeleccionada}</strong>
-                      {fisioElegida && <> con {nombreFisio(fisioElegida)}</>}
-                    </span>
-                  </div>
-                  <Aviso tipo="error">{aviso}</Aviso>
-                  <button type="submit" className="btn btn-primario btn-bloque" disabled={enviando || !motivo.trim()}>
-                    {enviando ? 'Reservando…' : 'Confirmar cita'}
-                  </button>
-                </form>
-              )}
-              {!horaSeleccionada && <Aviso tipo="error">{aviso}</Aviso>}
-            </div>
+              </form>
+            )}
+            {!horaSeleccionada && <Aviso tipo="error">{aviso}</Aviso>}
           </div>
         </div>
       </section>
