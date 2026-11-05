@@ -1788,47 +1788,33 @@ input[type="date"] {
   font-weight: 600;
 }
 
-.btn-atender {
+.asignar {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  padding: 0.25rem 0.7rem;
+  gap: 0.4rem;
+  padding: 0.15rem 0.3rem 0.15rem 0.7rem;
   border: 1.5px dashed var(--vino);
   border-radius: 999px;
-  background-color: var(--blanco);
   color: var(--vino);
   font-size: 0.8rem;
   font-weight: 500;
-  cursor: pointer;
 }
 
-.btn-atender:hover {
-  background-color: var(--crema-2);
+.asignar.asignada {
   border-style: solid;
-}
-
-.cita-fisio {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.1rem 0.7rem;
-  border-radius: 999px;
-  background-color: var(--gris-claro);
-  color: var(--texto-suave);
-  font-size: 0.8rem;
-  font-weight: 500;
-}
-
-.cita-fisio.mia {
+  border-color: transparent;
   background-color: var(--verde-fondo);
   color: var(--verde);
 }
 
-.cita-fisio .btn-texto {
-  padding: 0;
-  font-size: 0.78rem;
-  color: var(--verde);
-  text-decoration-color: rgba(46, 125, 79, 0.4);
+.asignar select {
+  padding: 0.15rem 0.4rem;
+  border: none;
+  border-radius: 999px;
+  background-color: var(--blanco);
+  color: var(--texto);
+  font-size: 0.8rem;
+  cursor: pointer;
 }
 
 .opciones-cierre {
