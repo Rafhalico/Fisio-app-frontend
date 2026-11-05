@@ -8,6 +8,10 @@ import '@fontsource/poppins/latin-500.css'
 import '@fontsource/poppins/latin-600.css'
 import './index.css'
 import App from './App.jsx'
+import { despertarServidor } from './api'
+
+// Nada más abrir la web, despertamos el servidor (ver api.js).
+despertarServidor()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

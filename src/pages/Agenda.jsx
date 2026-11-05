@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Phone, User, CalendarOff } from 'lucide-react';
+import { Phone, User, CalendarOff, PhoneIncoming } from 'lucide-react';
 import Pagina, { CabeceraPagina } from '../components/Pagina';
 import Calendario from '../components/Calendario';
 import CitaCard from '../components/CitaCard';
 import Aviso from '../components/Aviso';
 import DiasCerrados from '../components/DiasCerrados';
+import NuevaCita from '../components/NuevaCita';
 import { apiFetch, ERROR_CONEXION } from '../api';
 import { obtenerUsuario } from '../sesion';
 import { hoyTexto, formatearDia, capitalizar, diasDelRango } from '../utils/fechas';
@@ -117,6 +118,18 @@ function Agenda() {
               {!cargando && <span className="contador grande">{numero} {numero === 1 ? 'cita' : 'citas'}</span>}
             </div>
 
+            {!cargando && (
+              <NuevaCita
+                key={fecha}
+                fecha={fecha}
+                huecos={huecos}
+                plazas={plazas}
+                fisios={fisios}
+                idUsuario={usuario.id}
+                onCreada={(texto) => { setAviso({ tipo: 'ok', texto }); setRecarga((n) => n + 1); }}
+              />
+            )}
+
             {!cargando && huecos.length > 0 && plazas < plazasPorHora && (
               <p className="banda-cerrado">
                 <CalendarOff size={18} aria-hidden="true" />
@@ -151,12 +164,23 @@ function Agenda() {
                     key={cita.id}
                     cita={cita}
                     onCancelar={handleCancelar}
-                    pedirMotivo
+                    pedirMotivo={!cita.manual}
                     vistaDia
-                    titulo={<><User size={15} aria-hidden="true" /> {cita.nombre} {cita.apellidos}</>}
+                    titulo={
+                      <>
+                        <User size={15} aria-hidden="true" /> {cita.nombre} {cita.apellidos}
+                        {cita.manual && (
+                          <span className="etiqueta etiqueta-manual" title="Apuntada desde la agenda (teléfono, WhatsApp o en persona)">
+                            <PhoneIncoming size={12} aria-hidden="true" /> Apuntada a mano
+                          </span>
+                        )}
+                      </>
+                    }
                     detalle={
                       <div className="cita-paciente">
-                        <a href={`tel:${cita.telefono}`}><Phone size={14} aria-hidden="true" /> {cita.telefono}</a>
+                        {cita.telefono
+                          ? <a href={`tel:${cita.telefono}`}><Phone size={14} aria-hidden="true" /> {cita.telefono}</a>
+                          : <span className="texto-suave">Sin teléfono</span>}
                         <label className={cita.idfisio ? 'asignar asignada' : 'asignar'}>
                           <span>{cita.idfisio ? 'La atiende' : 'Asignar a'}</span>
                           <select
