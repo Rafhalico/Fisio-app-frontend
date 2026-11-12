@@ -11,12 +11,14 @@ import Admin from './pages/Admin';
 import RutaProtegida from './components/RutaProtegida';
 import ScrollArriba from './components/ScrollArriba';
 import AvisoServidor from './components/AvisoServidor';
+import BotonWhatsApp from './components/BotonWhatsApp';
 import './App.css';
 function App() {
   return (
     <BrowserRouter>
       <ScrollArriba />
       <AvisoServidor />
+      <BotonWhatsApp />
       <Routes>
         <Route path="/" element={<Inicio />} />
         <Route path="/acceso" element={<Acceso />} />

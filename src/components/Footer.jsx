@@ -1,4 +1,4 @@
-import { MapPin, Phone, Mail, AtSign, Clock } from 'lucide-react';
+import { MapPin, Phone, Mail, AtSign, Clock, MessageCircle } from 'lucide-react';
 import { CLINICA, HORARIO } from '../datos/clinica';
 
 function Footer() {
@@ -23,6 +23,9 @@ function Footer() {
           <h2>Contacto</h2>
           <a href={CLINICA.telefonoEnlace} className="footer-dato">
             <Phone size={16} aria-hidden="true" /> {CLINICA.telefono}
+          </a>
+          <a href={CLINICA.whatsapp} target="_blank" rel="noopener noreferrer" className="footer-dato">
+            <MessageCircle size={16} aria-hidden="true" /> WhatsApp
           </a>
           <a href={`mailto:${CLINICA.email}`} className="footer-dato footer-email">
             <Mail size={16} aria-hidden="true" /> <span>{CLINICA.email.replace('@', '​@')}</span>
