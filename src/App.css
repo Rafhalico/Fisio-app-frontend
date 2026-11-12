@@ -1995,6 +1995,57 @@ input[type="date"] {
   vertical-align: 0.1em;
 }
 
+/* ---- Opiniones (portada) ---- */
+.seccion-opiniones {
+  padding-top: 0;
+}
+
+.opiniones {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.8rem 2rem;
+  border-radius: var(--radio);
+  background-color: var(--crema-2);
+}
+
+.opiniones h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.opiniones p {
+  color: var(--texto-suave);
+}
+
+.opiniones .botones-fila {
+  flex-shrink: 0;
+  margin: 0 0 0 auto;
+}
+
+.opiniones-icono {
+  flex-shrink: 0;
+  color: var(--coral);
+}
+
+.nota-opinion a {
+  color: var(--vino);
+  font-weight: 600;
+}
+
+@media (max-width: 860px) {
+  .opiniones {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.5rem 1.5rem 1.9rem;
+  }
+  .opiniones .botones-fila {
+    margin: 0;
+    justify-content: flex-start;
+  }
+}
+
 /* ---- Botón flotante de WhatsApp ---- */
 .boton-whatsapp {
   position: fixed;
