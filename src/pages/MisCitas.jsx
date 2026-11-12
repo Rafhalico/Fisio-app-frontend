@@ -6,6 +6,7 @@ import CitaCard from '../components/CitaCard';
 import Aviso from '../components/Aviso';
 import { apiFetch, ERROR_CONEXION } from '../api';
 import { aDate } from '../utils/fechas';
+import { CLINICA } from '../datos/clinica';
 
 const PESTAÑAS = [
   { id: 'proximas', nombre: 'Próximas' },
@@ -87,6 +88,13 @@ function MisCitas() {
           <Aviso tipo={aviso?.tipo}>{aviso?.texto}</Aviso>
           {pestaña === 'proximas' && lista.length > 0 && (
             <p className="texto-suave nota">Puedes cancelar una cita hasta 24 horas antes.</p>
+          )}
+          {pestaña === 'historial' && lista.length > 0 && (
+            <p className="nota nota-opinion">
+              ¿Qué tal tus sesiones?{' '}
+              <a href={CLINICA.escribirResena} target="_blank" rel="noopener noreferrer">Déjanos tu opinión en Google</a>
+              {' '}— nos ayuda mucho.
+            </p>
           )}
 
           {cargando ? (

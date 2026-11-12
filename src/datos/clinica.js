@@ -8,6 +8,9 @@ export const CLINICA = {
   // Abre un chat de WhatsApp con la clínica, con el primer mensaje ya escrito (el paciente puede cambiarlo)
   whatsapp: `https://wa.me/34626446019?text=${encodeURIComponent('Hola, quería información sobre la clínica.')}`,
   email: 'fisioterapiamariamongarcia@gmail.com',
+  // Ficha de la clínica en Google: ver las opiniones y abrir directamente "Escribir una reseña"
+  resenas: 'https://maps.app.goo.gl/dXeb1o7bget75Z1G6',
+  escribirResena: 'https://search.google.com/local/writereview?placeid=ChIJJT5sYIRXbQ0RusI2qCEiWGU',
   instagram: 'fisioterapia_mmg',
   direccion: 'C. La Cruz, 26, bajo',
   localidad: '41565 Gilena, Sevilla',

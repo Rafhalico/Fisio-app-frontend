@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { HandHeart, Activity, Sparkles, CalendarCheck, MapPin, Phone, Navigation, MessageCircle } from 'lucide-react';
+import { HandHeart, Activity, Sparkles, CalendarCheck, MapPin, Phone, Navigation, MessageCircle, Star } from 'lucide-react';
 import Pagina from '../components/Pagina';
 import ProximosHuecos from '../components/ProximosHuecos';
 import EstadoClinica from '../components/EstadoClinica';
@@ -93,6 +93,22 @@ function Inicio() {
           <p className="centrado">
             <Link to="/reservar" className="btn btn-primario">Reservar cita</Link>
           </p>
+        </div>
+      </section>
+
+      <section className="seccion seccion-opiniones" aria-labelledby="titulo-opiniones">
+        <div className="contenedor opiniones">
+          <Star size={28} aria-hidden="true" className="opiniones-icono" />
+          <div>
+            <h2 id="titulo-opiniones">¿Ya nos conoces?</h2>
+            <p>Lee lo que dicen nuestros pacientes en Google o cuéntanos qué tal te fue. Tu opinión ayuda a otras personas a encontrarnos.</p>
+          </div>
+          <div className="botones-fila">
+            <a href={CLINICA.resenas} target="_blank" rel="noopener noreferrer" className="btn btn-secundario">Leer opiniones</a>
+            <a href={CLINICA.escribirResena} target="_blank" rel="noopener noreferrer" className="btn btn-primario">
+              <Star size={18} aria-hidden="true" /> Dejar mi opinión
+            </a>
+          </div>
         </div>
       </section>
 

@@ -1,4 +1,4 @@
-import { MapPin, Phone, Mail, AtSign, Clock, MessageCircle } from 'lucide-react';
+import { MapPin, Phone, Mail, AtSign, Clock, MessageCircle, Star } from 'lucide-react';
 import { CLINICA, HORARIO } from '../datos/clinica';
 
 function Footer() {
@@ -29,6 +29,9 @@ function Footer() {
           </a>
           <a href={`mailto:${CLINICA.email}`} className="footer-dato footer-email">
             <Mail size={16} aria-hidden="true" /> <span>{CLINICA.email.replace('@', '​@')}</span>
+          </a>
+          <a href={CLINICA.resenas} target="_blank" rel="noopener noreferrer" className="footer-dato">
+            <Star size={16} aria-hidden="true" /> Opiniones en Google
           </a>
           <a href={`https://instagram.com/${CLINICA.instagram}`} target="_blank" rel="noopener noreferrer" className="footer-dato">
             <AtSign size={16} aria-hidden="true" /> Instagram: {CLINICA.instagram}
