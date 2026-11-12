@@ -5,6 +5,8 @@ export const CLINICA = {
   nombre: 'María Montaño Fisioterapia',
   telefono: '626 44 60 19',
   telefonoEnlace: 'tel:+34626446019',
+  // Abre un chat de WhatsApp con la clínica, con el primer mensaje ya escrito (el paciente puede cambiarlo)
+  whatsapp: `https://wa.me/34626446019?text=${encodeURIComponent('Hola, quería información sobre la clínica.')}`,
   email: 'fisioterapiamariamongarcia@gmail.com',
   instagram: 'fisioterapia_mmg',
   direccion: 'C. La Cruz, 26, bajo',

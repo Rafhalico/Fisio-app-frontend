@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { HandHeart, Activity, Sparkles, CalendarCheck, MapPin, Phone, Navigation } from 'lucide-react';
+import { HandHeart, Activity, Sparkles, CalendarCheck, MapPin, Phone, Navigation, MessageCircle } from 'lucide-react';
 import Pagina from '../components/Pagina';
 import ProximosHuecos from '../components/ProximosHuecos';
 import EstadoClinica from '../components/EstadoClinica';
@@ -131,6 +131,9 @@ function Inicio() {
               <a href={CLINICA.telefonoEnlace} className="btn btn-secundario">
                 <Phone size={18} aria-hidden="true" /> Llamar
               </a>
+              <a href={CLINICA.whatsapp} target="_blank" rel="noopener noreferrer" className="btn btn-secundario">
+                <MessageCircle size={18} aria-hidden="true" /> WhatsApp
+              </a>
             </div>
           </div>
         </div>
@@ -143,6 +146,9 @@ function Inicio() {
             <Link to="/reservar" className="btn btn-blanco">Reservar cita</Link>
             <a href={CLINICA.telefonoEnlace} className="btn btn-borde-blanco">
               <Phone size={18} aria-hidden="true" /> Llamar
+            </a>
+            <a href={CLINICA.whatsapp} target="_blank" rel="noopener noreferrer" className="btn btn-borde-blanco">
+              <MessageCircle size={18} aria-hidden="true" /> WhatsApp
             </a>
           </div>
         </div>
